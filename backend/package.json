@@ -1,0 +1,28 @@
+{
+  "name": "innerverse-backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "db:up": "docker compose -f ../docker-compose.yml up -d",
+    "db:down": "docker compose -f ../docker-compose.yml down",
+    "auth:generate": "better-auth generate --config src/auth/auth.js --output src/db/auth-schema.sql -y",
+    "db:migrate": "node src/db/migrate.js"
+  },
+  "dependencies": {
+    "better-auth": "^1.7.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "multer": "^2.3.0",
+    "nodemailer": "^9.0.6",
+    "pg": "^8.23.0",
+    "zod": "^4.5.2"
+  },
+  "devDependencies": {
+    "@better-auth/cli": "^1.4.22",
+    "nodemon": "^3.1.14"
+  }
+}

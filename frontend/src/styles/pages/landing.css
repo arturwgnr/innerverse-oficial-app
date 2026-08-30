@@ -1,0 +1,390 @@
+/* Landing page, ported from /references/landing (the marketing build), one
+   100dvh section per viewport via scroll-snap. */
+
+.landing {
+  /* "proximity" instead of "mandatory": sections still occupy a full
+     viewport each and gently align, but scrolling itself stays fluid,
+     "mandatory" was fighting normal wheel/trackpad momentum and reading as
+     stuck or laggy. */
+  scroll-snap-type: y proximity;
+  overflow-y: auto;
+  height: 100dvh;
+  background: var(--background);
+}
+
+.landing-section {
+  min-height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  padding: var(--space-16) 0;
+}
+
+/* Scroll reveal, matches /references/landing's Reveal component */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Fixed nav, not its own section (matches the reference's <Nav />) */
+.landing-nav {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 30;
+  transform: translateX(-50%);
+  width: min(1080px, 92vw);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-6) 0;
+}
+
+.landing-nav-brand {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: var(--tracking-tight);
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.landing-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.landing-nav-cta {
+  padding: var(--space-2) var(--space-5);
+  font-size: 0.85rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+/* Hero */
+.hero-grid {
+  display: grid;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+.hero-title {
+  margin-top: var(--space-5);
+  max-width: 22ch;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  line-height: 1.05;
+}
+
+.hero-body {
+  max-width: 42ch;
+  margin-top: var(--space-6);
+  font-size: 0.95rem;
+}
+
+.hero-cta-row {
+  margin-top: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.hero-cta-note {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.hero-oracle-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+@media (min-width: 860px) {
+  .hero-grid {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+
+  .hero-oracle-wrap {
+    justify-content: flex-end;
+  }
+}
+
+/* Why journaling works, plain background, no nebula (matches reference) */
+.why-content {
+  max-width: 720px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.why-content h2 {
+  margin-top: var(--space-5);
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  line-height: 1.15;
+}
+
+.why-accent {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+}
+
+.why-content .lede {
+  margin-top: var(--space-7);
+  font-size: 1.05rem;
+  color: var(--foreground);
+}
+
+/* Four moments */
+.moments-title {
+  margin-top: var(--space-4);
+  max-width: 34ch;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  line-height: 1.15;
+  font-family: var(--font-ui);
+  font-weight: 400;
+}
+
+.moments-grid {
+  margin-top: var(--space-10);
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .moments-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .moments-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.moment-preview-card {
+  padding: var(--space-5);
+  height: 100%;
+}
+
+.moment-preview-window {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+.moment-preview-card h3 {
+  margin: var(--space-3) 0 0;
+  font-size: 1.15rem;
+}
+
+.moment-preview-card p:last-child {
+  margin: var(--space-2) 0 0;
+  font-size: 0.8rem;
+}
+
+/* Clean mirror, now a live interactive demo instead of static prose */
+.mirror-demo {
+  text-align: center;
+}
+
+.mirror-demo-title {
+  margin: var(--space-5) auto 0;
+  max-width: 32ch;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.2;
+}
+
+.mirror-demo-grid {
+  margin-top: var(--space-10);
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+  text-align: left;
+}
+
+.mirror-demo-label {
+  margin: 0 0 var(--space-2);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted-foreground);
+}
+
+.mirror-demo-entry {
+  padding: var(--space-6);
+}
+
+.mirror-demo-entry-text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+.mirror-demo-arrow {
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 1.2rem;
+}
+
+.mirror-demo-insight {
+  padding: var(--space-6);
+}
+
+.mirror-demo-insight h3 {
+  margin: var(--space-2) 0 0;
+  font-size: 1.2rem;
+}
+
+.mirror-demo-body {
+  margin-top: var(--space-2) !important;
+  font-size: 0.9rem;
+}
+
+.mirror-demo-response {
+  margin: var(--space-4) 0 0 !important;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--surface-border);
+  font-size: 0.85rem !important;
+  color: var(--foreground) !important;
+  animation: toast-in 0.3s ease-out;
+}
+
+@media (min-width: 780px) {
+  .mirror-demo-grid {
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--space-6);
+  }
+
+  .mirror-demo-arrow {
+    transform: rotate(0deg);
+  }
+}
+
+@media (max-width: 779px) {
+  .mirror-demo-arrow {
+    transform: rotate(90deg);
+  }
+}
+
+/* Oracle section */
+.oracle-grid {
+  display: grid;
+  gap: var(--space-10);
+  align-items: center;
+}
+
+.oracle-section-oracle {
+  display: flex;
+  justify-content: center;
+}
+
+.oracle-quote {
+  margin-top: var(--space-5);
+  max-width: 32rem;
+  padding: var(--space-7);
+}
+
+.oracle-quote p {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.95rem;
+}
+
+.oracle-quote-sub {
+  margin-top: var(--space-4) !important;
+  font-size: 0.8rem !important;
+}
+
+@media (min-width: 860px) {
+  .oracle-grid {
+    grid-template-columns: 0.8fr 1.2fr;
+  }
+
+  .oracle-section-oracle {
+    justify-content: flex-start;
+  }
+}
+
+/* Closing */
+.closing-content {
+  max-width: 600px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.closing-content .lede {
+  margin: var(--space-4) auto var(--space-8);
+  max-width: 40ch;
+}
+
+/* Footer, not a 100dvh section, professional close of the page */
+.landing-footer {
+  border-top: 1px solid var(--border);
+  background: var(--background);
+  padding: var(--space-14) 0 var(--space-8);
+}
+
+.footer-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.footer-brand p {
+  max-width: 280px;
+  margin-top: var(--space-3);
+  font-size: 0.85rem;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+  font-size: 0.85rem;
+}
+
+.footer-links a {
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footer-links a:hover {
+  color: var(--foreground);
+}
+
+.footer-bottom {
+  margin-top: var(--space-10);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+@media (min-width: 640px) {
+  .footer-grid {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}

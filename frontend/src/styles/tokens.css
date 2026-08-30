@@ -1,0 +1,117 @@
+/* Design tokens. Source of truth: /references/dashboard (internal screens)
+   and /references/landing (marketing page), both share the same underlying
+   design system, ported here as plain CSS custom properties (no Tailwind).
+   Always light, cosmos seen in daylight, never a dark background, not even
+   during the Night moment. */
+
+:root {
+  /* Base surface */
+  --background: oklch(0.982 0.011 84);
+  --foreground: oklch(0.28 0.028 285);
+  --border: oklch(0.9 0.014 80);
+  --input: oklch(0.92 0.012 80);
+  --ring: oklch(0.66 0.1 292);
+  --muted: oklch(0.955 0.014 84);
+  --muted-foreground: oklch(0.28 0.028 285 / 0.62);
+  --popover: oklch(0.995 0.005 90);
+  --popover-foreground: oklch(0.28 0.028 285);
+  --accent: oklch(0.93 0.03 300);
+  --accent-foreground: oklch(0.34 0.05 292);
+  --destructive: oklch(0.62 0.16 22);
+  --destructive-foreground: oklch(0.985 0.008 90);
+
+  /* Brand anchor */
+  --primary: oklch(0.44 0.12 292);
+  --primary-foreground: oklch(0.99 0.005 90);
+
+  /* Iridescent accents */
+  --violet: oklch(0.68 0.14 300);
+  --teal: oklch(0.76 0.1 190);
+  --rose: oklch(0.79 0.09 20);
+  --gold: oklch(0.85 0.1 85);
+
+  /* Mood taxonomy (calendar, fast mode) */
+  --mood-radiant: oklch(0.86 0.11 88);
+  --mood-steady: oklch(0.83 0.08 165);
+  --mood-tender: oklch(0.86 0.07 20);
+  --mood-restless: oklch(0.82 0.09 300);
+  --mood-heavy: oklch(0.74 0.05 260);
+  --mood-numb: oklch(0.86 0.012 90);
+
+  /* Moment of day tone: three accent points feeding the nebula gradient, plus
+     a near white base tint that the whole moment leans on (surfaces, cards).
+     Defaults to morning. Overridden per [data-moment] below. */
+  --tone-1: oklch(0.85 0.1 85);
+  --tone-2: oklch(0.79 0.09 20);
+  --tone-3: oklch(0.88 0.08 300);
+  --tone-base: oklch(0.97 0.025 85);
+
+  /* Surfaces derive from the active moment tone, never a flat white, this is
+     what makes glass cards read as "floating over the nebula" instead of
+     plain opaque cards. */
+  --surface: color-mix(in oklab, oklch(1 0 0) 74%, var(--tone-base));
+  --surface-border: color-mix(in oklab, var(--border) 65%, transparent);
+  --shadow-soft: 0 1px 2px oklch(0.4 0.04 285 / 0.04),
+    0 12px 32px -12px color-mix(in oklab, var(--tone-1) 35%, oklch(0.4 0.06 292 / 0.16));
+  --shadow-glass: var(--shadow-soft);
+  --shadow-lift: 0 2px 4px oklch(0.4 0.04 285 / 0.05),
+    0 28px 56px -20px color-mix(in oklab, var(--tone-1) 45%, oklch(0.4 0.08 292 / 0.22));
+
+  /* Type */
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-ui: "Figtree", "Segoe UI", sans-serif;
+  --tracking-tight: -0.02em;
+
+  /* Radii, very rounded and soft throughout (references lean on rounded-2xl
+     / rounded-3xl almost everywhere). */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-2xl: 40px;
+  --radius-full: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+}
+
+/* Leve diferenciação estética por momento do dia (JOURNAL.md secao 2). Cada
+   momento gira pelo mesmo conjunto de acentos iridescentes num par dominante
+   diferente, nunca escurecendo, sempre dentro do espectro claro. */
+[data-moment="morning"] {
+  --tone-1: oklch(0.85 0.1 85);
+  --tone-2: oklch(0.79 0.09 20);
+  --tone-3: oklch(0.88 0.08 300);
+  --tone-base: oklch(0.97 0.025 85);
+}
+
+[data-moment="afternoon"] {
+  --tone-1: oklch(0.76 0.1 190);
+  --tone-2: oklch(0.85 0.1 85);
+  --tone-3: oklch(0.88 0.07 300);
+  --tone-base: oklch(0.97 0.02 190);
+}
+
+[data-moment="night"] {
+  --tone-1: oklch(0.68 0.14 300);
+  --tone-2: oklch(0.79 0.09 20);
+  --tone-3: oklch(0.85 0.06 190);
+  --tone-base: oklch(0.965 0.025 300);
+}
+
+[data-moment="decompress"] {
+  --tone-1: oklch(0.79 0.09 20);
+  --tone-2: oklch(0.76 0.1 190);
+  --tone-3: oklch(0.88 0.07 85);
+  --tone-base: oklch(0.97 0.022 20);
+}

@@ -1,0 +1,16 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: innerverse-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: innerverse
+      POSTGRES_PASSWORD: innerverse
+      POSTGRES_DB: innerverse
+    ports:
+      - "5432:5432"
+    volumes:
+      - innerverse_db_data:/var/lib/postgresql/data
+
+volumes:
+  innerverse_db_data:

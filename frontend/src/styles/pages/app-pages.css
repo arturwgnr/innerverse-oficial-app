@@ -1,0 +1,824 @@
+/* Today, arrival stage. Matches /references/dashboard's index.tsx: a date
+   eyebrow, a disclosure toggle for the moment label, an Oracle top right. */
+.today-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.today-date {
+  margin: 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted-foreground);
+}
+
+.today-moment-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2) 0 0;
+  color: var(--foreground);
+}
+
+.today-moment-label {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.today-moment-caret {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+
+.today-moment-meta {
+  margin: var(--space-1) 0 0;
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+
+.moment-switcher {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.moment-switcher button {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s ease;
+}
+
+.moment-switcher button:active {
+  transform: scale(0.98);
+}
+
+.moment-switcher button.active {
+  box-shadow: var(--shadow-soft), 0 0 0 1px var(--ring);
+}
+
+.moment-switcher-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--foreground);
+}
+
+.moment-switcher-window {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+}
+
+.arrival-card {
+  padding: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+.arrival-tagline {
+  margin: 0 0 var(--space-3);
+  font-size: 0.9rem;
+}
+
+.arrival-card h2 {
+  font-size: 1.6rem;
+  line-height: 1.25;
+  margin-bottom: var(--space-6);
+}
+
+.arrival-write {
+  width: 100%;
+}
+
+.arrival-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.shortcut-card {
+  padding: var(--space-5);
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.shortcut-card:hover {
+  transform: translateY(-2px);
+}
+
+.shortcut-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.shortcut-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--foreground);
+  margin: 0 0 var(--space-1);
+}
+
+.shortcut-body {
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.proposal-banner {
+  padding: var(--space-6);
+  margin-bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.proposal-banner ul {
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.proposal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.suggest-change {
+  display: block;
+  margin: var(--space-4) auto 0;
+}
+
+/* Entry (write) screen, matches /references/dashboard's entry.tsx */
+.entry-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.entry-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+}
+
+.entry-back {
+  background: none;
+  border: none;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.entry-back:hover {
+  color: var(--foreground);
+}
+
+.entry-moment-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted-foreground);
+}
+
+.retro-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  margin-bottom: var(--space-4);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.retro-pill.active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: transparent;
+}
+
+.entry-date-input {
+  align-self: flex-start;
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.entry-prompt-card {
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.entry-prompt-card h1 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.entry-own-prompt {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  line-height: 1.3;
+  color: var(--foreground);
+  padding: 0;
+}
+
+.entry-own-prompt:focus {
+  outline: none;
+}
+
+.entry-prompt-select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  line-height: 1.3;
+  color: var(--foreground);
+  padding: 0;
+}
+
+.entry-prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.entry-prompt-actions button {
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.entry-prompt-actions button.active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: transparent;
+}
+
+.entry-textarea {
+  width: 100%;
+  margin-bottom: var(--space-4);
+  padding: var(--space-5);
+  resize: vertical;
+  min-height: 180px;
+}
+
+.entry-save {
+  width: 100%;
+}
+
+/* Fast mode, matches /references/dashboard's fast.tsx (3-column mood grid) */
+.fast-mood-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.fast-mood-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-2);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.fast-mood-cell:active {
+  transform: scale(0.97);
+}
+
+.fast-mood-cell.active {
+  box-shadow: var(--shadow-soft), 0 0 0 2px var(--ring);
+}
+
+.fast-mood-glyph {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  font-size: 1.1rem;
+  color: var(--foreground);
+}
+
+.fast-mood-label {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.fast-bullets-eyebrow {
+  margin: 0 0 var(--space-3);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted-foreground);
+}
+
+.fast-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.fast-bullets input {
+  border: none;
+}
+
+.fast-add-bullet {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: var(--space-1) 0;
+}
+
+.fast-save {
+  width: 100%;
+}
+
+/* Calendar, matches /references/dashboard's calendar.tsx */
+.calendar-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.calendar-title-row .screen-title {
+  flex: 1;
+  text-align: center;
+}
+
+.calendar-arrow {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--foreground);
+  padding: 0 var(--space-2);
+}
+
+.calendar-grid {
+  padding: var(--space-4);
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: var(--space-2);
+  text-align: center;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+}
+
+.calendar-cells {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-2);
+}
+
+.calendar-cell {
+  aspect-ratio: 1;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: color-mix(in oklab, var(--muted) 60%, transparent);
+  color: var(--foreground);
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  position: relative;
+  transition: transform 0.1s ease;
+}
+
+/* Compound selectors, not just .mood-radiant etc: those single-class rules
+   live in components.css (shared with Fast/Today's mood chips) and lose the
+   cascade to this file's own .calendar-cell background at equal
+   specificity, since this file is imported later. This was why a logged
+   mood never actually showed a colour on the calendar. */
+.calendar-cell.mood-radiant {
+  background: var(--mood-radiant);
+}
+.calendar-cell.mood-steady {
+  background: var(--mood-steady);
+}
+.calendar-cell.mood-tender {
+  background: var(--mood-tender);
+}
+.calendar-cell.mood-restless {
+  background: var(--mood-restless);
+}
+.calendar-cell.mood-heavy {
+  background: var(--mood-heavy);
+}
+.calendar-cell.mood-numb {
+  background: var(--mood-numb);
+}
+
+.calendar-cell:not(:disabled) {
+  cursor: pointer;
+}
+
+.calendar-cell:not(:disabled):active {
+  transform: scale(0.95);
+}
+
+.calendar-cell.empty {
+  background: transparent;
+  visibility: hidden;
+}
+
+.calendar-divergent-mark {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 4px;
+  background: var(--primary);
+  opacity: 0.55;
+  border-radius: var(--radius-full);
+}
+
+.mood-legend {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+}
+
+/* Bottom sheet (calendar day tie break), matches the reference's fixed
+   bottom overlay rather than a centered dialog. */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: oklch(0.28 0.028 285 / 0.25);
+  backdrop-filter: blur(4px);
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+.sheet {
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+.day-detail-list {
+  margin-top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.day-detail-entry {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.day-detail-entry:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.day-detail-entry-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+}
+
+.day-detail-time {
+  margin-left: auto;
+}
+
+.day-detail-text {
+  margin: var(--space-2) 0 0;
+  font-size: 0.9rem;
+  color: var(--foreground);
+}
+
+.day-detail-bullets {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  font-size: 0.9rem;
+}
+
+.sheet-sub {
+  margin-top: var(--space-2);
+  font-size: 0.8rem;
+}
+
+.sheet-mood-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-5) 0;
+}
+
+.sheet-mood-list button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: transparent;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+/* Patterns, matches /references/dashboard's patterns.tsx */
+.patterns-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+.patterns-summary p {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.9rem;
+}
+
+.pattern-cards {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.pattern-card {
+  padding: var(--space-6);
+}
+
+.pattern-category {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.pattern-card h3 {
+  font-size: 1.2rem;
+  margin: var(--space-2) 0 0;
+}
+
+.pattern-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.pattern-confidence {
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+}
+
+.correction-buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.correction-buttons button {
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.correction-buttons button.accent {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.correction-buttons button.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: transparent;
+}
+
+.patterns-footnote {
+  margin-top: var(--space-5);
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+/* About me, matches /references/dashboard's oracle.tsx */
+.about-me-hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.about-me-hero h1 {
+  margin-top: var(--space-2);
+  font-size: 2rem;
+  line-height: 1.15;
+}
+
+.about-me-eyebrow {
+  margin: var(--space-3) 0 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted-foreground);
+}
+
+.about-me-hero-sub {
+  max-width: 30ch;
+  margin: var(--space-3) 0 0;
+  font-size: 0.85rem;
+}
+
+.knowledge-bar {
+  width: 100%;
+  height: 6px;
+  margin-top: var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--input);
+  overflow: hidden;
+}
+
+.knowledge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--teal), var(--gold));
+}
+
+.about-me-column {
+  padding: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+.about-me-column ul {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.about-me-column li {
+  display: flex;
+  gap: var(--space-3);
+  font-size: 0.9rem;
+}
+
+.about-me-column li strong {
+  display: block;
+  color: var(--foreground);
+}
+
+.about-me-column li p {
+  margin: var(--space-1) 0 0;
+  font-size: 0.85rem;
+}
+
+.about-me-dot {
+  flex-shrink: 0;
+  margin-top: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+}
+
+.about-me-dot-light {
+  background: var(--primary);
+}
+
+.about-me-dot-dark {
+  background: var(--violet);
+}
+
+.about-me-dark {
+  border-color: color-mix(in oklab, var(--violet) 30%, var(--surface-border));
+}
+
+.about-me-correct {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-bottom: var(--space-3);
+}
+
+.about-me-correct:hover {
+  color: var(--foreground);
+}
+
+.about-me-quote {
+  padding: var(--space-6);
+  margin-top: var(--space-3);
+}
+
+.about-me-quote p {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.9rem;
+}
+
+.about-me-quote-sub {
+  margin-top: var(--space-3) !important;
+  font-size: 0.7rem !important;
+}
+
+.correction-form {
+  margin-bottom: var(--space-3);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.correction-form textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.correction-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}

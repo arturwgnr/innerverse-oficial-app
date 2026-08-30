@@ -1,0 +1,44 @@
+/* Cosmos seen in daylight: soft moving light over a warm, light base, never a
+   dark starfield. Reimplemented in plain CSS, no Tailwind (JOURNAL.md sec. 10).
+   Mirrors the technique validated in /reference (radial gradients at strong
+   mix percentages, blurred, drifting slowly), recalibrated so it actually
+   reads on screen instead of washing out to a flat tint. */
+
+.nebula {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.nebula::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  z-index: -1;
+  background-image: radial-gradient(60% 42% at 18% 8%, color-mix(in oklab, var(--tone-1) 88%, transparent), transparent 70%),
+    radial-gradient(55% 40% at 88% 14%, color-mix(in oklab, var(--tone-3) 82%, transparent), transparent 72%),
+    radial-gradient(60% 45% at 78% 82%, color-mix(in oklab, var(--tone-2) 85%, transparent), transparent 74%),
+    radial-gradient(50% 38% at 12% 88%, color-mix(in oklab, var(--tone-1) 70%, transparent), transparent 68%);
+  filter: blur(36px);
+  animation: nebula-drift 42s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes nebula-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-2%, 3%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(2%, -2%, 0) scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nebula::before {
+    animation: none;
+  }
+}

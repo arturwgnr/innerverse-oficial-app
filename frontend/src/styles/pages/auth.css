@@ -1,0 +1,375 @@
+/* Login, matches /references/landing's login.tsx: brand link, single
+   surface card, Google above a divider, plain-bordered inputs. */
+.login-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.login-inner {
+  width: min(400px, 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.login-brand {
+  align-self: flex-start;
+  margin-bottom: var(--space-6);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.login-card {
+  padding: var(--space-8);
+}
+
+.login-card h1 {
+  font-size: 1.6rem;
+}
+
+.login-sub {
+  margin-top: var(--space-2);
+}
+
+.login-google {
+  width: 100%;
+  margin-top: var(--space-6);
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-6) 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted-foreground);
+}
+
+.login-divider span {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.auth-form input {
+  border: 1px solid var(--border);
+  background: transparent;
+}
+
+.login-card .button-primary {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.login-switch {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-5);
+  background: none;
+  border: none;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.login-switch:hover {
+  color: var(--foreground);
+}
+
+/* Same fixed-card-lost-on-a-big-screen issue as onboarding. */
+@media (min-width: 860px) {
+  .login-inner {
+    width: min(480px, 100%);
+  }
+
+  .login-card h1 {
+    font-size: 2rem;
+  }
+
+  .login-card {
+    padding: var(--space-10);
+  }
+}
+
+/* Onboarding, matches /references/dashboard's onboarding.tsx: a progress
+   bar of segments, one question per screen, forward-only navigation. */
+.onboarding-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.onboarding-card {
+  width: min(460px, 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.onboarding-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+
+.onboarding-progress-seg {
+  flex: 1;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--input);
+}
+
+.onboarding-progress-seg.filled {
+  background: linear-gradient(90deg, var(--violet), var(--teal));
+}
+
+.onboarding-oracle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-6);
+}
+
+.onboarding-intro {
+  text-align: center;
+  align-items: center;
+}
+
+.onboarding-intro .onboarding-hero-oracle {
+  margin-bottom: var(--space-6);
+}
+
+.onboarding-step-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* Subtle on purpose (UPDATES.md): a small glyph, not a prominent button. */
+.onboarding-back {
+  background: none;
+  border: none;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: var(--space-1);
+  line-height: 1;
+}
+
+.onboarding-back:hover:not(:disabled) {
+  color: var(--foreground);
+}
+
+.onboarding-back:disabled {
+  visibility: hidden;
+}
+
+.onboarding-eyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted-foreground);
+}
+
+.onboarding-options {
+  margin-top: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.onboarding-option {
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  color: var(--foreground);
+  font-size: 0.95rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.onboarding-option:hover {
+  transform: translateY(-1px);
+}
+
+.onboarding-option:active {
+  transform: scale(0.99);
+}
+
+.onboarding-option.active {
+  box-shadow: var(--shadow-soft), 0 0 0 2px var(--ring);
+}
+
+.onboarding-card h1 {
+  font-size: 2rem;
+  line-height: 1.15;
+}
+
+.onboarding-note {
+  margin-top: var(--space-3);
+}
+
+.onboarding-input {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  width: 100%;
+}
+
+.onboarding-textarea {
+  width: 100%;
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  resize: none;
+}
+
+.onboarding-footer {
+  margin-top: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.onboarding-footer .button-primary {
+  width: 100%;
+}
+
+.onboarding-skip {
+  background: none;
+  border: none;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.onboarding-skip:hover {
+  color: var(--foreground);
+}
+
+/* On a desktop-sized viewport, a 460px card with a 168px mascot reads as a
+   tiny lost island in the middle of the screen, whereas on mobile that same
+   card fills most of the width. Scale the whole thing up to match. */
+@media (min-width: 860px) {
+  .onboarding-card {
+    width: min(600px, 100%);
+  }
+
+  .onboarding-card h1 {
+    font-size: 2.6rem;
+  }
+
+  .onboarding-note {
+    font-size: 1.05rem;
+  }
+
+  .onboarding-option {
+    padding: var(--space-5) var(--space-6);
+    font-size: 1.05rem;
+  }
+
+  .onboarding-input,
+  .onboarding-textarea {
+    padding: var(--space-5) var(--space-6);
+    font-size: 1.05rem;
+  }
+
+  .onboarding-hero-oracle {
+    --oracle-size: 220px !important;
+  }
+}
+
+/* Mindfulness: a full, distraction-free screen (outside AppShell, no bottom
+   nav), same visual language as onboarding. */
+.mindfulness-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  position: relative;
+}
+
+.mindfulness-back {
+  position: absolute;
+  top: var(--space-6);
+  left: var(--space-6);
+}
+
+.mindfulness-inner {
+  width: min(460px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.mindfulness-inner h1 {
+  margin-top: var(--space-6);
+  font-size: 2rem;
+}
+
+.mindfulness-durations {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mindfulness-durations .onboarding-option {
+  width: auto;
+  text-align: center;
+}
+
+.mindfulness-start {
+  margin-top: var(--space-6);
+  width: 100%;
+}
+
+.mindfulness-timer {
+  margin-top: var(--space-8);
+  font-family: var(--font-display);
+  font-size: 4rem;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.mindfulness-controls {
+  margin-top: var(--space-8);
+  display: flex;
+  gap: var(--space-3);
+}
+
+@media (min-width: 860px) {
+  .mindfulness-inner {
+    width: min(560px, 100%);
+  }
+
+  .mindfulness-inner h1 {
+    font-size: 2.6rem;
+  }
+
+  .mindfulness-timer {
+    font-size: 5.5rem;
+  }
+}
