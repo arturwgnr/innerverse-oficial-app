@@ -40,7 +40,8 @@ router.post("/", requireAuth, async (req, res) => {
   // profile, not fail the whole request, that's throwing away real data
   // the user just gave us over a step that is a nice-to-have enrichment.
   let profile = seed;
-  if (process.env.OPENROUTER_API_KEY) {
+  // mergeProfile calls Gemini now, not OpenRouter.
+  if (process.env.GEMINI_API_KEY) {
     try {
       profile = await mergeProfile({
         currentProfile: {},

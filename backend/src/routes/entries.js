@@ -4,6 +4,9 @@ import { pool } from "../db/pool.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { embedText } from "../services/voyage.js";
 import { mergeProfile } from "../services/profileMerge.js";
+import { generateEntryAnalysis } from "../services/analysis.js";
+
+const FREE_DAILY_ANALYSIS_LIMIT = 3;
 
 const router = Router();
 
@@ -38,7 +41,9 @@ async function updateMemoryInBackground({ userId, entry }) {
       ]);
     }
 
-    if (process.env.OPENROUTER_API_KEY) {
+    // mergeProfile calls Gemini now, not OpenRouter (UPDATES.md "model
+    // provider decision").
+    if (process.env.GEMINI_API_KEY) {
       const { rows } = await pool.query(
         "select profile from living_profiles where user_id = $1",
         [userId]
@@ -58,6 +63,71 @@ async function updateMemoryInBackground({ userId, entry }) {
     }
   } catch (err) {
     console.error("Background memory update failed:", err);
+  }
+}
+
+// Deep, standalone analysis of this one entry (UPDATES.md: replaces the old
+// cross-entry Patterns feature entirely). Free plan: at most 3 a day, the
+// day boundary is the same simple `now()::date` server date used elsewhere
+// in this codebase for daily caps. Entries past the cap are still saved,
+// they just don't get a deep read that day.
+async function maybeGenerateEntryAnalysis({ userId, entry }) {
+  // generateEntryAnalysis calls Gemini now, not OpenRouter.
+  if (!process.env.GEMINI_API_KEY) {
+    await pool.query("update entries set analysis_status = 'skipped' where id = $1", [entry.id]);
+    return;
+  }
+  try {
+    const { rows: countRows } = await pool.query(
+      `select count(*)::int as count from entry_analyses where user_id = $1 and created_at::date = now()::date`,
+      [userId]
+    );
+    if (countRows[0].count >= FREE_DAILY_ANALYSIS_LIMIT) {
+      await pool.query("update entries set analysis_status = 'skipped' where id = $1", [entry.id]);
+      return;
+    }
+
+    const [{ rows: profileRows }, { rows: recentEntries }] = await Promise.all([
+      pool.query("select profile from living_profiles where user_id = $1", [userId]),
+      pool.query(
+        `select moment, mode, text_content, mood, bullets, occurred_at
+         from entries where user_id = $1 and id != $2 order by occurred_at desc limit 10`,
+        [userId, entry.id]
+      ),
+    ]);
+
+    const analysis = await generateEntryAnalysis({
+      entry,
+      livingProfile: profileRows[0]?.profile,
+      recentEntries,
+    });
+
+    const client = await pool.connect();
+    try {
+      await client.query("begin");
+      const { rows: analysisRows } = await client.query(
+        `insert into entry_analyses (user_id, entry_id, title) values ($1, $2, $3) returning id`,
+        [userId, entry.id, analysis.title]
+      );
+      const analysisId = analysisRows[0].id;
+      for (const [position, observation] of analysis.observations.entries()) {
+        await client.query(
+          `insert into insights (user_id, kind, title, body, entry_id, analysis_id, position)
+           values ($1, 'entry_analysis_observation', $2, $3, $4, $5, $6)`,
+          [userId, analysis.title, observation, entry.id, analysisId, position]
+        );
+      }
+      await client.query("update entries set analysis_status = 'ready' where id = $1", [entry.id]);
+      await client.query("commit");
+    } catch (err) {
+      await client.query("rollback");
+      throw err;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error("Entry analysis generation failed:", err);
+    await pool.query("update entries set analysis_status = 'failed' where id = $1", [entry.id]);
   }
 }
 
@@ -93,6 +163,7 @@ router.post("/", requireAuth, async (req, res) => {
   res.status(201).json(entry);
 
   updateMemoryInBackground({ userId: req.user.id, entry });
+  maybeGenerateEntryAnalysis({ userId: req.user.id, entry });
 });
 
 router.get("/", requireAuth, async (req, res) => {
@@ -111,7 +182,7 @@ router.get("/", requireAuth, async (req, res) => {
 
   const { rows } = await pool.query(
     `select id, moment, mode, language, prompt, text_content, audio_url, mood, bullets,
-            is_retroactive, occurred_at, written_at
+            is_retroactive, occurred_at, written_at, analysis_status
      from entries
      where ${conditions.join(" and ")}
      order by occurred_at desc`,

@@ -1,4 +1,4 @@
-import { callClaude } from "./claude.js";
+import { callGemini } from "./gemini.js";
 
 const MERGE_SYSTEM_PROMPT = `You maintain a living profile for a journaling app called Innerverse.
 The profile is a compact JSON object (never longer than roughly 2500 tokens) describing
@@ -17,17 +17,15 @@ export async function mergeProfile({ currentProfile, evidence, evidenceType }) {
     evidence,
   });
 
-  const raw = await callClaude({
+  // No responseSchema on purpose: the profile is deliberately open ended
+  // (see prompt above, "compact JSON object... no fixed fields"), forcing a
+  // fixed shape here would fight the whole design. responseMimeType alone
+  // (set inside callGemini) still guarantees syntactically valid JSON.
+  return callGemini({
     system: MERGE_SYSTEM_PROMPT,
     messages: [{ role: "user", content: userMessage }],
     maxTokens: 3000,
   });
-
-  try {
-    return JSON.parse(raw);
-  } catch {
-    throw new Error(`Profile merge did not return valid JSON: ${raw.slice(0, 200)}`);
-  }
 }
 
 export function buildOnboardingProfileSeed({ birthDate, responses }) {

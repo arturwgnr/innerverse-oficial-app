@@ -22,7 +22,7 @@ import { auth } from "./auth/auth.js";
 import entriesRouter from "./routes/entries.js";
 import onboardingRouter from "./routes/onboarding.js";
 import profileRouter from "./routes/profile.js";
-import patternsRouter from "./routes/patterns.js";
+import analysisRouter from "./routes/analysis.js";
 import aboutMeRouter from "./routes/aboutMe.js";
 import correctionsRouter from "./routes/corrections.js";
 import uploadsRouter from "./routes/uploads.js";
@@ -32,7 +32,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "http://localhost:5174",
     credentials: true,
   }),
 );
@@ -48,7 +48,7 @@ app.get("/api/health", (req, res) => res.json({ ok: true }));
 app.use("/api/onboarding", onboardingRouter);
 app.use("/api/entries", entriesRouter);
 app.use("/api/profile", profileRouter);
-app.use("/api/patterns", patternsRouter);
+app.use("/api/analysis", analysisRouter);
 app.use("/api/about-me", aboutMeRouter);
 app.use("/api/corrections", correctionsRouter);
 app.use("/api/uploads", uploadsRouter);

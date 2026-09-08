@@ -32,7 +32,8 @@ router.post("/", requireAuth, async (req, res) => {
 
   res.status(201).json(rows[0]);
 
-  if (process.env.OPENROUTER_API_KEY) {
+  // mergeProfile calls Gemini now, not OpenRouter.
+  if (process.env.GEMINI_API_KEY) {
     updateProfileFromCorrection({ userId: req.user.id, insightId, verdict, userNote }).catch((err) =>
       console.error("Failed to fold correction into profile:", err)
     );
