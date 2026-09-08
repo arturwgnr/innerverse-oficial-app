@@ -27,17 +27,21 @@ export async function callGemini({ system, messages, maxTokens = 1024, model, re
   }
 
   const systemText = system ? `${system}\n\n${NO_EM_DASH_RULE}` : NO_EM_DASH_RULE;
-  const resolvedModel = model || process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const resolvedModel = model || process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
   const generationConfig = {
     maxOutputTokens: maxTokens,
     responseMimeType: "application/json",
-    // Disables extended "thinking" (supported on the 2.5 flash family this
-    // default targets). Otherwise thinking tokens come out of the same
-    // maxOutputTokens budget as the actual answer, exactly the failure mode
-    // that broke deepseek-r1:free on OpenRouter (see UPDATES.md), just with
-    // a different provider.
-    thinkingConfig: { thinkingBudget: 0 },
+    // Minimizes extended "thinking" so it does not eat into the same
+    // maxOutputTokens budget as the actual answer (the same failure mode
+    // that broke deepseek-r1:free on OpenRouter, see UPDATES.md). Gemini 3.x
+    // models (gemini-3.6-flash and newer) use thinkingLevel ("minimal" is
+    // the closest equivalent to off), NOT thinkingBudget: that field is only
+    // for the older Gemini 2.5 family and is silently invalid on Gemini 3,
+    // which caused the "400 INVALID_ARGUMENT" errors we hit. gemini-2.5-flash
+    // is also no longer issuable to new API keys, so gemini-3.6-flash with
+    // thinkingLevel is the only currently working combination.
+    thinkingConfig: { thinkingLevel: "minimal" },
   };
   if (responseSchema) generationConfig.responseSchema = responseSchema;
 
