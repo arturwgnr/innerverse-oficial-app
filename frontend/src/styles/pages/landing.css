@@ -1,22 +1,23 @@
 /* Landing page, ported from /references/landing (the marketing build), one
-   100dvh section per viewport via scroll-snap. */
+   generous, roughly-100dvh-tall section per topic. Scroll-snap removed
+   (UPDATES.md "remover rolagem fixa"): it was fighting normal wheel/
+   trackpad momentum and reading as stuck, scrolling is now completely free,
+   sections just keep their generous height for breathing room. */
 
 .landing {
-  /* "proximity" instead of "mandatory": sections still occupy a full
-     viewport each and gently align, but scrolling itself stays fluid,
-     "mandatory" was fighting normal wheel/trackpad momentum and reading as
-     stuck or laggy. */
-  scroll-snap-type: y proximity;
   overflow-y: auto;
   overflow-x: hidden;
   height: 100dvh;
+  /* Smooth-scrolls anchor jumps within this element specifically (nav
+     links, the brand link, the footer's "back to top"): .landing scrolls
+     itself, not the window, so the global `html { scroll-behavior: smooth }`
+     in base.css never applied here on its own. */
+  scroll-behavior: smooth;
   background: var(--background);
 }
 
 .landing-section {
   min-height: 100dvh;
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -426,15 +427,11 @@
   }
 }
 
-/* Moved to the frame's top-right corner, enlarged, and given a slight right
-   tilt (UPDATES.md round 6 #2), like a mascot sticker peeking over the edge
-   of the screenshot rather than standing at its bottom-left. Sits above the
-   bubble in stacking order (higher z-index) since the two now share that
-   corner. */
-/* Back at the frame's bottom-left corner, upright, no tilt (follow-up fix:
-   the enlarge-and-move-to-top-right-with-a-tilt treatment from round 6 #2
-   read as leaning/off instead of a deliberate sticker, reverted to
-   straight). Enlarged size (190) kept, only position and rotation changed. */
+/* Bottom-left corner, upright, no tilt (follow-up fix: an earlier
+   enlarge-and-move-to-top-right-with-a-tilt treatment read as leaning/off,
+   reverted to straight). Static now (UPDATES.md "Seção 1": the hover-scale
+   this used to have on .hero-visual-wrap:hover is removed below, only the
+   frame's own mouse-tilt stays interactive, see .hero-visual-frame above). */
 .hero-visual-oracle {
   position: absolute;
   left: -8%;
@@ -442,28 +439,41 @@
   top: auto;
   bottom: -8%;
   z-index: 2;
-  transform: none;
-  transition: transform 0.3s var(--ease-out);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .hero-visual-wrap:hover .hero-visual-oracle {
-    transform: scale(1.04);
+/* Responsive gap fix (UPDATES.md "Seção 1", mobile bug): .hero-grid drops to
+   a single column below 860px (see the min-width:860px rule further down),
+   but the mascot/bubble only ever shrank below 480px, leaving everything
+   between those two widths with a narrow single-column card still carrying
+   full desktop-size decorations hanging off it, badly overlapping/
+   overflowing. Two tiers now: a moderate shrink for the whole single-column
+   range, a further one for actual phone widths. */
+@media (max-width: 859px) {
+  .hero-visual-bubble {
+    top: 4%;
+    right: -2%;
+    max-width: 240px;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .hero-visual-oracle {
+    left: -4%;
+    bottom: -5%;
+    --oracle-size: 130px !important;
   }
 }
 
 @media (max-width: 480px) {
   .hero-visual-bubble {
-    top: 4%;
     right: -3%;
-    max-width: 220px;
+    max-width: 200px;
     padding: var(--space-3) var(--space-4);
   }
 
   .hero-visual-oracle {
     left: -3%;
-    bottom: -6%;
-    --oracle-size: 120px !important;
+    bottom: -4%;
+    --oracle-size: 105px !important;
   }
 }
 
@@ -563,16 +573,21 @@
   --feature-accent: var(--violet);
 }
 
+/* Full-card gradient fill on hover (user follow-up: the old corner glow was
+   too shy), a two-stop diagonal gradient from the card's own accent into a
+   deeper mix of that accent with --primary, so it reads as one deliberate
+   modern gradient rather than a flat color swap. Icon/title/body all flip
+   to white below for contrast against it. */
 .why-feature-card::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   opacity: 0;
-  background-image: radial-gradient(
-    70% 65% at 15% -10%,
-    color-mix(in oklab, var(--feature-accent, var(--tone-1)) 40%, transparent),
-    transparent 72%
+  background-image: linear-gradient(
+    135deg,
+    var(--feature-accent, var(--tone-1)) 0%,
+    color-mix(in oklab, var(--feature-accent, var(--tone-1)) 55%, var(--primary)) 100%
   );
   transition: opacity 0.35s ease;
 }
@@ -588,8 +603,13 @@
 }
 
 .why-feature-card:hover {
-  box-shadow: var(--shadow-lift);
-  border-color: color-mix(in oklab, var(--feature-accent, var(--tone-1)) 45%, var(--surface-border));
+  box-shadow: 0 20px 44px -12px color-mix(in oklab, var(--feature-accent, var(--tone-1)) 55%, transparent);
+  border-color: transparent;
+}
+
+.why-feature-card:hover h3,
+.why-feature-card:hover p {
+  color: white;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -616,24 +636,28 @@
   color: var(--foreground);
   transition:
     transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    background 0.3s ease;
+    background 0.3s ease,
+    color 0.3s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .why-feature-card:hover .why-feature-icon {
     transform: scale(1.15) rotate(-8deg);
-    background: color-mix(in oklab, var(--feature-accent, var(--tone-1)) 38%, var(--surface));
+    background: color-mix(in oklab, white 30%, transparent);
+    color: white;
   }
 }
 
 .why-feature-card h3 {
   margin: var(--space-4) 0 0;
   font-size: 1.05rem;
+  transition: color 0.3s ease;
 }
 
 .why-feature-card p {
   margin: var(--space-2) 0 0;
   font-size: 0.85rem;
+  transition: color 0.3s ease;
 }
 
 /* Four moments */
@@ -674,12 +698,21 @@
    each moment's own --tone-1/2/3 (tokens.css [data-moment]) already set via
    this card's data-moment attribute, so "morning" here is the same warm gold
    as everywhere else morning shows up in the app, not a bespoke one-off. */
+/* Now a <button> (UPDATES.md "Seção 3": tap to explore), not a static div,
+   so the same colorful reveal below responds to a tap on touch devices too,
+   not only a mouse hover. Button-reset properties layered on top of the
+   existing card look so it reads identically to the old div. */
 .moment-preview-card {
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  width: 100%;
   padding: var(--space-5);
   height: 100%;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
   transition:
     transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.25s ease,
@@ -725,7 +758,8 @@
     );
 }
 
-.moment-preview-card:hover {
+.moment-preview-card:hover,
+.moment-preview-card.active {
   box-shadow: var(--shadow-lift);
   border-color: color-mix(in oklab, var(--tone-1) 45%, var(--surface-border));
 }
@@ -736,7 +770,12 @@
   }
 }
 
-.moment-preview-card:hover::before {
+.moment-preview-card.active {
+  transform: translateY(-2px);
+}
+
+.moment-preview-card:hover::before,
+.moment-preview-card.active::before {
   opacity: 1;
 }
 
@@ -747,6 +786,15 @@
   .moment-preview-card:hover::before {
     animation: nebula-drift 8s ease-in-out infinite alternate;
   }
+}
+
+.moment-preview-card.active::before {
+  animation: nebula-drift 8s ease-in-out infinite alternate;
+}
+
+.moment-preview-card:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 /* Night gets actual stars, not just a darker wash (EDITS.md round 2 #2's
@@ -768,7 +816,8 @@
   transition: opacity 0.4s ease;
 }
 
-.moment-preview-card[data-moment="night"]:hover::after {
+.moment-preview-card[data-moment="night"]:hover::after,
+.moment-preview-card[data-moment="night"].active::after {
   opacity: 0.85;
 }
 
@@ -776,6 +825,10 @@
   .moment-preview-card[data-moment="night"]:hover::after {
     animation: star-twinkle 2.2s ease-in-out infinite alternate;
   }
+}
+
+.moment-preview-card[data-moment="night"].active::after {
+  animation: star-twinkle 2.2s ease-in-out infinite alternate;
 }
 
 @keyframes star-twinkle {
@@ -833,99 +886,6 @@
 
 .moments-mood-legend-wrap .mood-legend {
   justify-content: center;
-}
-
-/* Clean mirror, now a live interactive demo instead of static prose */
-.mirror-demo {
-  text-align: center;
-}
-
-.mirror-demo-title {
-  margin: var(--space-5) auto 0;
-  max-width: 32ch;
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  line-height: 1.2;
-}
-
-.mirror-demo-grid {
-  margin-top: var(--space-10);
-  display: grid;
-  gap: var(--space-4);
-  align-items: center;
-  text-align: left;
-}
-
-.mirror-demo-label {
-  margin: 0 0 var(--space-2);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--muted-foreground);
-}
-
-.mirror-demo-entry {
-  padding: var(--space-6);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .mirror-demo-entry:hover {
-    transform: translateY(-3px);
-  }
-}
-
-.mirror-demo-entry-text {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  line-height: 1.4;
-  color: var(--foreground);
-}
-
-.mirror-demo-arrow {
-  text-align: center;
-  color: var(--muted-foreground);
-  font-size: 1.2rem;
-}
-
-.mirror-demo-insight {
-  padding: var(--space-6);
-}
-
-.mirror-demo-insight h3 {
-  margin: var(--space-2) 0 0;
-  font-size: 1.2rem;
-}
-
-.mirror-demo-body {
-  margin-top: var(--space-2) !important;
-  font-size: 0.9rem;
-}
-
-.mirror-demo-response {
-  margin: var(--space-4) 0 0 !important;
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--surface-border);
-  font-size: 0.85rem !important;
-  color: var(--foreground) !important;
-  animation: reveal-in 220ms var(--ease-out);
-}
-
-@media (min-width: 780px) {
-  .mirror-demo-grid {
-    grid-template-columns: 1fr auto 1fr;
-    gap: var(--space-6);
-  }
-
-  .mirror-demo-arrow {
-    transform: rotate(0deg);
-  }
-}
-
-@media (max-width: 779px) {
-  .mirror-demo-arrow {
-    transform: rotate(90deg);
-  }
 }
 
 /* Oracle section, reverted to its original two-column grid (UPDATES.md
@@ -1007,16 +967,24 @@
   }
 }
 
-/* Closing */
+/* Closing. Title removed (UPDATES.md), the paragraph is now the section's
+   only line of text, promoted from a small supporting "lede" under a
+   headline to a real closing statement in its own right (display font,
+   larger size) so removing the title doesn't leave the section feeling
+   empty. */
 .closing-content {
   max-width: 600px;
   text-align: center;
   margin: 0 auto;
 }
 
-.closing-content .lede {
-  margin: var(--space-4) auto var(--space-8);
-  max-width: 40ch;
+.closing-lede {
+  margin: 0 auto var(--space-8);
+  max-width: 32ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  line-height: 1.25;
+  color: var(--foreground);
 }
 
 .closing-cta-buttons {
@@ -1038,23 +1006,44 @@
   color: var(--foreground);
 }
 
-/* Footer, not a 100dvh section, professional close of the page */
+/* Footer, not a 100dvh section, professional close of the page (UPDATES.md
+   footer redesign: elevated from the previous plain-text-links-on-white
+   look, content unchanged, brand/tagline/link columns/copyright/back-to-top
+   all still here). A soft tinted surface instead of flat background, a thin
+   brand-gradient accent line along the top edge, and a real divider between
+   the main grid and the copyright row instead of margin alone. */
 .landing-footer {
-  border-top: 1px solid var(--border);
-  background: var(--background);
-  padding: var(--space-14) 0 var(--space-8);
+  position: relative;
+  background: color-mix(in oklab, var(--violet) 4%, var(--background));
+  padding: var(--space-16) 0 var(--space-8);
+}
+
+.landing-footer-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--rose), var(--violet), var(--teal));
+  opacity: 0.7;
 }
 
 .footer-grid {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-10);
+  padding-bottom: var(--space-10);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.footer-brand .landing-nav-brand {
+  font-size: 1.3rem;
 }
 
 .footer-brand p {
   max-width: 280px;
-  margin-top: var(--space-3);
-  font-size: 0.85rem;
+  margin-top: var(--space-4);
+  font-size: 0.9rem;
 }
 
 .footer-brand .footer-promise {
@@ -1067,65 +1056,117 @@
 .footer-nav-columns {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-10);
+  gap: var(--space-12);
 }
 
 .footer-links {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  font-size: 0.85rem;
+  gap: var(--space-3);
+  font-size: 0.9rem;
 }
 
 .footer-links-heading {
   margin: 0 0 var(--space-1);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   color: var(--muted-foreground);
   opacity: 0.8;
 }
 
+/* Underline reveals from the left on hover instead of an instant colour
+   swap, a small deliberate craft touch matching the rest of the page's
+   hover polish (clip-path/transform driven, not a layout-affecting property). */
 .footer-links a {
+  position: relative;
+  display: inline-block;
+  width: fit-content;
   color: var(--muted-foreground);
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color 0.2s ease;
+}
+
+.footer-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--ease-out);
 }
 
 .footer-links a:hover {
   color: var(--foreground);
 }
 
+.footer-links a:hover::after {
+  transform: scaleX(1);
+}
+
 .footer-bottom-row {
-  margin-top: var(--space-10);
+  margin-top: var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-4);
 }
 
 .footer-bottom {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--muted-foreground);
 }
 
 .footer-promise {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-family: var(--font-display);
   font-style: italic;
   color: var(--muted-foreground);
 }
 
+/* Pill button instead of a plain underlined text link with a raw "↑"
+   glyph baked into the copy, the same real-icon treatment used everywhere
+   else in the app now applied here too. */
 .footer-top-link {
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  font-size: 0.78rem;
   color: var(--muted-foreground);
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s var(--ease-out);
 }
 
-.footer-top-link:hover {
-  color: var(--foreground);
+.footer-top-link-icon {
+  display: inline-flex;
+  transition: transform 0.2s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .footer-top-link:hover {
+    color: var(--foreground);
+    background: var(--accent);
+    border-color: transparent;
+    transform: translateY(-2px);
+  }
+
+  .footer-top-link:hover .footer-top-link-icon {
+    transform: translateY(-2px);
+  }
 }
 
 @media (min-width: 640px) {

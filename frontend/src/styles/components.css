@@ -704,7 +704,6 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
   width: 32px;
   height: 32px;
   border: none;
@@ -716,6 +715,123 @@ textarea:focus {
   transition:
     color 0.15s ease,
     background 0.15s ease;
+}
+
+/* Notifications bell (user request): sits right before sign-out in the
+   topbar, `margin-left: auto` moved here from .app-topbar-signout so the
+   two get pushed to the far right together, instead of the bell landing
+   immediately after the brand text with sign-out alone on the right. */
+.notifications-bell-wrap {
+  position: relative;
+  margin-left: auto;
+}
+
+.app-topbar-notifications {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-topbar-notifications:hover {
+    color: var(--foreground);
+    background: var(--muted);
+  }
+}
+
+.app-topbar-notifications:active {
+  transform: scale(0.94);
+}
+
+.notifications-badge {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--destructive);
+  box-shadow: 0 0 0 2px var(--popover);
+}
+
+.notifications-panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 45;
+  width: min(340px, 84vw);
+  max-height: min(420px, 70vh);
+  overflow-y: auto;
+  padding: var(--space-5);
+  transform-origin: top right;
+  animation: notifications-panel-in 0.18s var(--ease-out);
+}
+
+@keyframes notifications-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notifications-panel {
+    animation: none;
+  }
+}
+
+.notifications-panel-heading {
+  margin: 0 0 var(--space-4);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted-foreground);
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.notifications-item:not(:last-child) {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.notifications-item-date {
+  margin: 0;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+}
+
+.notifications-item-title {
+  margin: var(--space-1) 0 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.notifications-item-body {
+  margin: var(--space-1) 0 0;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
 }
 
 @media (hover: hover) and (pointer: fine) {

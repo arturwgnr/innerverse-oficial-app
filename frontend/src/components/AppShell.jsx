@@ -7,6 +7,7 @@ import { signOut } from "../lib/authClient.js";
 import { api } from "../lib/api.js";
 import { flushEntryQueue } from "../lib/entryQueue.js";
 import { pickLine } from "../lib/toastCopy.js";
+import { NotificationsBell } from "./NotificationsBell.jsx";
 
 // Reduced to four bottom nav items plus a center "add" shortcut (EDITS.md
 // round 2 #1, Hick's Law: fewer choices in the spot used most often).
@@ -137,6 +138,7 @@ function AppShellInner() {
             <HamburgerIcon />
           </button>
           <span className="app-topbar-brand">{t.common.appName}</span>
+          <NotificationsBell />
           {/* Same sign-out action as the sidebar, also reachable straight
               from the top bar without opening the menu (EDITS.md round 5). */}
           <button type="button" className="app-topbar-signout" onClick={handleSignOut} aria-label={t.common.signOut}>

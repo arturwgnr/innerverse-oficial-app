@@ -4,7 +4,6 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 import { Oracle } from "../components/Oracle.jsx";
 import { useInView } from "../hooks/useInView.js";
 import { MOMENTS } from "../lib/moments.js";
-import { CleanMirrorDemo } from "../components/CleanMirrorDemo.jsx";
 
 const MOODS = [1, 2, 3, 4, 5, 6];
 
@@ -51,13 +50,19 @@ function HeroBubble({ lines }) {
 }
 
 export function Landing() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   // Active-section nav highlighting (UPDATES.md round 6 #2's visual pass):
   // the nav link matching whatever section is actually in view lights up as
   // the visitor scrolls, instead of the links sitting static regardless of
   // where they are on the page.
   const [activeSection, setActiveSection] = useState("");
+  // Tap-to-explore on the moment cards (UPDATES.md "Seção 3": the section
+  // read as static, only fading in on scroll). Reuses the same colorful
+  // hover wash as its payoff, so a tap gives touch visitors (no hover at
+  // all) the same reveal a mouse visitor gets, instead of the section only
+  // ever coming alive for desktop.
+  const [activeMoment, setActiveMoment] = useState(null);
 
   // .landing scrolls itself (overflow-y:auto), not the window, so a plain
   // window scroll listener never fires here. Without a surface once scrolled
@@ -117,12 +122,15 @@ export function Landing() {
         className={`landing-nav ${scrolled ? "landing-nav-scrolled glass" : ""}`}
       >
         <div className="landing-nav-inner container">
-          <Link to="/" className="landing-nav-brand">
+          {/* Was `<Link to="/">`, a no-op click since this page already is
+              "/" (UPDATES.md): now scrolls smoothly to the top, matching the
+              footer's own "back to top" link. */}
+          <a href="#hero" className="landing-nav-brand">
             <span className="landing-nav-logo" aria-hidden="true">
               ✦
             </span>
             {t.common.appName}
-          </Link>
+          </a>
           <nav className="landing-nav-links">
             <a href="#how-it-works" className={activeSection === "how-it-works" ? "active" : ""}>
               {t.landing.nav.linkHowItWorks}
@@ -224,11 +232,20 @@ export function Landing() {
           <div className="moments-grid">
             {MOMENTS.map((m, i) => (
               <Reveal key={m} delay={i * 90}>
-                <div className="moment-preview-card glass" data-moment={m}>
+                {/* A button, not a static div (UPDATES.md "Seção 3"): tapping
+                    toggles the same colorful wash .active gets in CSS, so
+                    the card genuinely invites exploring each moment instead
+                    of only reacting to a mouse hover. */}
+                <button
+                  type="button"
+                  className={`moment-preview-card glass ${activeMoment === m ? "active" : ""}`}
+                  data-moment={m}
+                  onClick={() => setActiveMoment((prev) => (prev === m ? null : m))}
+                >
                   <p className="moment-preview-window">{t.moments[m].window}</p>
                   <h3>{t.moments[m].label}</h3>
                   <p>{t.moments[m].tagline}</p>
-                </div>
+                </button>
               </Reveal>
             ))}
           </div>
@@ -247,12 +264,6 @@ export function Landing() {
             </div>
           </Reveal>
         </div>
-      </section>
-
-      <section className="landing-section mirror-section">
-        <Reveal className="container">
-          <CleanMirrorDemo language={language} />
-        </Reveal>
       </section>
 
       <section
@@ -283,8 +294,8 @@ export function Landing() {
 
       <section className="landing-section closing-section">
         <Reveal className="container closing-content">
-          <h2>{t.landing.closing.title}</h2>
-          <p className="lede">{t.landing.closing.body}</p>
+          {/* Title removed (UPDATES.md), paragraph and CTAs kept. */}
+          <p className="closing-lede">{t.landing.closing.body}</p>
           <div className="closing-cta-buttons">
             <Link className="button-primary" to="/login?mode=signup">
               {t.landing.hero.cta}
@@ -297,6 +308,7 @@ export function Landing() {
       </section>
 
       <footer className="landing-footer">
+        <div className="landing-footer-accent" aria-hidden="true" />
         <div className="container footer-grid">
           <div className="footer-brand">
             <span className="landing-nav-brand">
@@ -330,8 +342,16 @@ export function Landing() {
           <p className="footer-bottom">
             &copy; {new Date().getFullYear()} {t.landing.footer.copyright}
           </p>
+          {/* Real SVG arrow instead of the unicode "↑" that used to be baked
+              into the copy string (UPDATES.md footer redesign), same
+              treatment already used for icons elsewhere in the app. */}
           <a href="#hero" className="footer-top-link">
             {t.landing.footer.backToTop}
+            <span className="footer-top-link-icon" aria-hidden="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
           </a>
         </div>
       </footer>

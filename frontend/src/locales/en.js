@@ -97,6 +97,13 @@ export default {
     stats: "Stats",
     settings: "Settings",
     menu: "Menu",
+    notifications: "Notifications",
+  },
+  // Topbar bell (user request): broadcast "what's new" notifications, same
+  // rows for every user, dated so people can see when something shipped.
+  notifications: {
+    heading: "What's new",
+    empty: "Nothing new yet.",
   },
   landing: {
     nav: {
@@ -177,14 +184,6 @@ export default {
         "The day already has a shape. Innerverse just asks you to notice it.",
       moodLegendLabel: "Six ways a moment can feel",
     },
-    cleanMirror: {
-      eyebrow: "The clean mirror",
-      title:
-        "Innerverse commits to the truth of what you wrote, regardless of tone.",
-      body: "And it's never the last word. When a reflection misses, you can say so, right on the insight. \"That's not it\" is data too, sometimes more useful than being right the first time.",
-      body2:
-        "Nothing about how it reads you changes without you knowing. It asks first.",
-    },
     oracleSection: {
       eyebrow: "A companion that remembers",
       quote:
@@ -193,7 +192,6 @@ export default {
         "Your words become a map. Over time, I learn the way you think.",
     },
     closing: {
-      title: "Start with today. Let the story unfold.",
       body: "Just write. Over time, the pieces begin to connect.",
     },
     footer: {
@@ -205,7 +203,7 @@ export default {
       howItWorks: "How it works",
       oracle: "The Oracle",
       copyright: "Innerverse. All rights reserved.",
-      backToTop: "Back to top ↑",
+      backToTop: "Back to top",
     },
   },
   moments: {

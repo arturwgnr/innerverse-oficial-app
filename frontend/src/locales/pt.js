@@ -75,6 +75,11 @@ export default {
     stats: "Estatísticas",
     settings: "Ajustes",
     menu: "Menu",
+    notifications: "Notificações",
+  },
+  notifications: {
+    heading: "Novidades",
+    empty: "Nada de novo ainda.",
   },
   landing: {
     nav: {
@@ -129,19 +134,12 @@ export default {
       title: "O dia já tem uma forma. O Innerverse só pede pra você perceber.",
       moodLegendLabel: "Seis formas de um momento se sentir",
     },
-    cleanMirror: {
-      eyebrow: "O espelho limpo",
-      title: "O Innerverse tem compromisso com a verdade do que você escreveu, independente do tom usado.",
-      body: "E nunca é a última palavra. Quando uma análise erra, você pode dizer isso, direto no insight. \"Não foi bem isso\" também é um dado, às vezes mais útil do que acertar de primeira.",
-      body2: "Nada muda na forma como ele te lê sem você saber. Ele pergunta antes.",
-    },
     oracleSection: {
       eyebrow: "Um companheiro que lembra",
       quote: "Você ficou fora por quatro dias. Isso é permitido. Eu deixei a página aberta, só isso.",
       quoteSub: "Cada entrada acrescenta luz. Nada nunca é tirado.",
     },
     closing: {
-      title: "Comece com hoje. Veja onde isso leva.",
       body: "Suas entradas são suas. Nada é vendido, nada é compartilhado.",
     },
     footer: {
@@ -153,7 +151,7 @@ export default {
       howItWorks: "Como funciona",
       oracle: "O Oráculo",
       copyright: "Innerverse. Todos os direitos reservados.",
-      backToTop: "Voltar ao topo ↑",
+      backToTop: "Voltar ao topo",
     },
   },
   moments: {
