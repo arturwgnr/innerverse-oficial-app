@@ -64,22 +64,6 @@ begin
     check (analysis_status in ('pending', 'processing', 'ready', 'skipped', 'failed'));
 end $$;
 
--- One time backfill for rows that predate this column: without it, every
--- pre-existing entry defaults to 'pending' and would show as "still
--- analyzing" forever on the Analysis page, since no background job ever
--- revisits an old entry. Anything with a real entry_analyses row is 'ready'
--- (the query on the next line joins to insights, not this new column, so
--- this is purely cosmetic for those). Anything else old enough to not
--- plausibly still be mid flight (10 minutes is generous) goes to 'skipped',
--- same silent treatment as a live skip, rather than a misleading 'pending'.
-update entries e set analysis_status = 'ready'
-  where e.analysis_status = 'pending' and exists (select 1 from entry_analyses ea where ea.entry_id = e.id);
-
-update entries e set analysis_status = 'skipped'
-  where e.analysis_status = 'pending'
-    and e.created_at < now() - interval '10 minutes'
-    and not exists (select 1 from entry_analyses ea where ea.entry_id = e.id);
-
 -- Mood taxonomy (UPDATES.md round 3 #2): moved from six unordered poetic
 -- labels (radiant/steady/tender/restless/heavy/numb, deliberately no order)
 -- to an ordered 1-6 thermostatic scale (1 worst, 6 best). Weather-register
@@ -160,6 +144,28 @@ create table if not exists entry_analyses (
 );
 
 create index if not exists entry_analyses_user_created_idx on entry_analyses (user_id, created_at desc);
+
+-- Backfill for analysis_status (added right after the analysis_status
+-- column definition above), relocated to here because it reads from
+-- entry_analyses, which does not exist yet at that earlier point in a
+-- fresh database. Order matters for a top-to-bottom run against a new
+-- database even though every statement above is individually idempotent.
+-- One time backfill for rows that predate this column: without it, every
+-- pre-existing entry defaults to 'pending' and would show as "still
+-- analyzing" forever on the Analysis page, since no background job ever
+-- revisits an old entry. Anything with a real entry_analyses row is 'ready'
+-- (the query on the next line joins to insights, not this new column, so
+-- this is purely cosmetic for those). Anything else old enough to not
+-- plausibly still be mid flight (10 minutes is generous) goes to 'skipped',
+-- same silent treatment as a live skip, rather than a misleading 'pending'.
+update entries e set analysis_status = 'ready'
+  where e.analysis_status = 'pending' and exists (select 1 from entry_analyses ea where ea.entry_id = e.id);
+
+update entries e set analysis_status = 'skipped'
+  where e.analysis_status = 'pending'
+    and e.created_at < now() - interval '10 minutes'
+    and not exists (select 1 from entry_analyses ea where ea.entry_id = e.id);
+
 
 -- Insights cover per-entry analysis observations and About Me light/dark
 -- understandings, anything the clean mirror principle can be corrected on.

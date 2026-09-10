@@ -7,6 +7,21 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
   trustedOrigins: [process.env.FRONTEND_URL].filter(Boolean),
+  // Cross-site session cookie for production: the frontend (Vercel) and
+  // backend (Render) sit on two different domains, not subdomains of one
+  // site, so the cookie's default SameSite=Lax gets silently dropped by the
+  // browser on a cross-origin request. Without this, sign-in looks like it
+  // succeeds (the API call returns 200) but the session never actually
+  // sticks, the very next request comes back unauthenticated. Left out of
+  // local dev on purpose: Secure cookies require HTTPS, and localhost isn't.
+  ...(process.env.NODE_ENV === "production" && {
+    advanced: {
+      defaultCookieAttributes: {
+        sameSite: "none",
+        secure: true,
+      },
+    },
+  }),
   emailAndPassword: {
     enabled: true,
     // Defaults to required. Only skipped when explicitly set to "false",
