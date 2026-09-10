@@ -1,4 +1,4 @@
-import { callGemini } from "./gemini.js";
+import { callLLMJson } from "./llm.js";
 import { describeMood } from "../lib/moods.js";
 
 // Deep, standalone analysis of a single journal entry (replaces the old
@@ -80,7 +80,10 @@ export async function generateEntryAnalysis({ entry, livingProfile, recentEntrie
     },
   });
 
-  return callGemini({
+  // Flagship OpenRouter model on fallback (not the cheap one): this is the
+  // deep analysis the user actually reads, see UPDATES.md "Prompt: fallback
+  // automático Gemini -> OpenRouter (Claude)".
+  return callLLMJson({
     system: ENTRY_ANALYSIS_SYSTEM_PROMPT,
     messages: [{ role: "user", content: userMessage }],
     maxTokens: 500,
@@ -145,7 +148,9 @@ export async function analyzeAboutMe({ entries, livingProfile }) {
     entries: entries.map((e) => ({ ...e, mood: describeMood(e.mood) })),
   });
 
-  return callGemini({
+  // Flagship OpenRouter model on fallback, same reasoning as
+  // generateEntryAnalysis above: also deep, user-facing content.
+  return callLLMJson({
     system: ABOUT_ME_SYSTEM_PROMPT,
     messages: [{ role: "user", content: userMessage }],
     maxTokens: 900,

@@ -1,9 +1,10 @@
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
 // Same project wide writing rule as claude.js, duplicated rather than
-// imported: services/claude.js stays untouched as the manual fallback path
-// (see UPDATES.md, "model provider decision"), so nothing here should
-// depend on it.
+// imported: services/claude.js stays untouched as its own module, now the
+// automatic fallback path wired in by services/llm.js's callLLMJson() (see
+// UPDATES.md "Prompt: fallback automático Gemini -> OpenRouter (Claude)"),
+// so nothing in this file should depend on it.
 const NO_EM_DASH_RULE =
   "Never use the em dash character in your response, under any circumstance. Use a period, comma, or parentheses instead.";
 

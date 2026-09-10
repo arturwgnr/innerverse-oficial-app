@@ -30,6 +30,7 @@ import calendarOverridesRouter from "./routes/calendarOverrides.js";
 import reasonsRouter from "./routes/reasons.js";
 import settingsRouter from "./routes/settings.js";
 import statsRouter from "./routes/stats.js";
+import notificationsRouter from "./routes/notifications.js";
 
 const app = express();
 
@@ -59,6 +60,7 @@ app.use("/api/calendar-overrides", calendarOverridesRouter);
 app.use("/api/reasons", reasonsRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/stats", statsRouter);
+app.use("/api/notifications", notificationsRouter);
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use((err, req, res, next) => {

@@ -1,4 +1,4 @@
-import { callGemini } from "./gemini.js";
+import { callLLMJson } from "./llm.js";
 
 const MERGE_SYSTEM_PROMPT = `You maintain a living profile for a journaling app called Innerverse.
 The profile is a compact JSON object (never longer than roughly 2500 tokens) describing
@@ -21,10 +21,15 @@ export async function mergeProfile({ currentProfile, evidence, evidenceType }) {
   // (see prompt above, "compact JSON object... no fixed fields"), forcing a
   // fixed shape here would fight the whole design. responseMimeType alone
   // (set inside callGemini) still guarantees syntactically valid JSON.
-  return callGemini({
+  // cheap: true on OpenRouter fallback (UPDATES.md "Prompt: fallback
+  // automático Gemini -> OpenRouter (Claude)"): this runs on every single
+  // entry, the high volume/low stakes background call OPENROUTER_MODEL_CHEAP
+  // exists for.
+  return callLLMJson({
     system: MERGE_SYSTEM_PROMPT,
     messages: [{ role: "user", content: userMessage }],
     maxTokens: 3000,
+    cheap: true,
   });
 }
 

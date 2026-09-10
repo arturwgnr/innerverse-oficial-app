@@ -298,3 +298,34 @@ create table if not exists reason_keywords (
   created_at timestamptz not null default now(),
   unique (user_id, label)
 );
+
+-- Broadcast "what's new" notifications (topbar bell icon): global, not
+-- per-user, hand-authored for now (directly in the database or a future
+-- admin route, no authoring UI yet). created_at doubles as the "shipped on"
+-- date shown in the bell panel. notification_reads tracks per-user read
+-- state separately so the same broadcast row is shared by everyone.
+create table if not exists notifications (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists notifications_created_idx on notifications (created_at desc);
+
+create table if not exists notification_reads (
+  user_id text not null references "user"(id) on delete cascade,
+  notification_id uuid not null references notifications(id) on delete cascade,
+  read_at timestamptz not null default now(),
+  primary key (user_id, notification_id)
+);
+
+-- One example notification so the bell has something to show before real
+-- content gets authored (user asked for a placeholder to adjust later).
+-- Guarded on the table being empty rather than a fixed id, so it only ever
+-- seeds once and never reappears after being deleted.
+insert into notifications (title, body)
+select
+  'Welcome to What''s New',
+  'This is where you''ll hear about updates to Innerverse, new features and fixes, each one dated so you can see exactly when it shipped.'
+where not exists (select 1 from notifications);
