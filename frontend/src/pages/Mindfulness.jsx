@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import { useToast } from "../context/ToastContext.jsx";
+import { api } from "../lib/api.js";
 import { Oracle } from "../components/Oracle.jsx";
 
 const DURATIONS = [1, 3, 5, 10];
@@ -19,10 +21,14 @@ function formatTime(totalSeconds) {
 export function Mindfulness() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [durationMin, setDurationMin] = useState(3);
   const [phase, setPhase] = useState("pick"); // pick | running | done
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [muted, setMuted] = useState(false);
+  const [reflection, setReflection] = useState("");
+  const [savingReflection, setSavingReflection] = useState(false);
+  const [reflectionSaved, setReflectionSaved] = useState(false);
   const audioRef = useRef(null);
   const intervalRef = useRef(null);
 
@@ -70,6 +76,32 @@ export function Mindfulness() {
     });
   }
 
+  // Optional, saved as its own entries.mode = 'mindfulness' row (EDITS.md
+  // round 2 #3), never a regular full entry: the AI needs to read it as a
+  // post-meditation reflection, not an account of the whole day (see the
+  // mode-specific note in services/analysis.js's system prompt).
+  async function saveReflection() {
+    setSavingReflection(true);
+    try {
+      await api.post("/api/entries", {
+        moment: "decompress",
+        mode: "mindfulness",
+        language,
+        textContent: reflection,
+        occurredAt: new Date().toISOString(),
+      });
+      setReflectionSaved(true);
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setSavingReflection(false);
+    }
+  }
+
+  // "hi" (inviting) while still choosing, "meditating" once the session has
+  // actually started, through to the close (EDITS.md round 2 #3).
+  const oracleVariant = phase === "pick" ? "hi" : "meditating";
+
   return (
     <div className="mindfulness-page nebula grain" data-moment="decompress">
       <audio ref={audioRef} src={TRACK_URL} loop preload="none" />
@@ -79,15 +111,20 @@ export function Mindfulness() {
       </button>
 
       <div className="mindfulness-inner">
-        <Oracle size={168} variant="hi" className="onboarding-hero-oracle" float={phase !== "running"} />
+        <Oracle size={168} variant={oracleVariant} className="onboarding-hero-oracle" float={phase !== "running"} />
 
         {phase === "pick" && (
           <>
             <h1>{language === "pt" ? "Um momento pra você" : "Take a moment for yourself"}</h1>
             <p className="onboarding-note">
               {language === "pt"
-                ? "Escolha quanto tempo você quer. Sem pressa, sem estrutura."
-                : "Choose how long you want. No rush, no structure."}
+                ? "Escolha quanto tempo você quer. Sem pressa, sem estrutura, só você, uma música suave e o tempo passando."
+                : "Choose how long you want. No rush, no structure, just you, some soft music, and the time passing."}
+            </p>
+            <p className="onboarding-note mindfulness-pick-sub">
+              {language === "pt"
+                ? "Você pode encerrar antes se precisar, e escrever uma reflexão no final, se quiser."
+                : "You can end early if you need to, and jot down a reflection at the end, if you want."}
             </p>
             <div className="mindfulness-durations">
               {DURATIONS.map((d) => (
@@ -132,6 +169,39 @@ export function Mindfulness() {
                 ? "Nada que você precisa fazer com isso agora. Só notar que você parou."
                 : "Nothing you need to do with this now. Just notice that you stopped."}
             </p>
+
+            {!reflectionSaved && (
+              <>
+                <textarea
+                  rows={4}
+                  className="mindfulness-reflection glass"
+                  placeholder={
+                    language === "pt"
+                      ? "Alguma coisa querendo ser dita? Opcional." : "Anything wanting to be said? Optional."
+                  }
+                  value={reflection}
+                  onChange={(e) => setReflection(e.target.value)}
+                />
+                {reflection.trim() && (
+                  <button
+                    type="button"
+                    className="button-secondary mindfulness-save-reflection"
+                    onClick={saveReflection}
+                    disabled={savingReflection}
+                  >
+                    {savingReflection
+                      ? language === "pt" ? "Salvando..." : "Saving..."
+                      : language === "pt" ? "Guardar essa reflexão" : "Keep this reflection"}
+                  </button>
+                )}
+              </>
+            )}
+            {reflectionSaved && (
+              <p className="onboarding-note mindfulness-reflection-saved">
+                {language === "pt" ? "Guardada." : "Kept."}
+              </p>
+            )}
+
             <button type="button" className="button-primary mindfulness-start" onClick={() => navigate("/today")}>
               {language === "pt" ? "Voltar pro Today" : "Back to Today"}
             </button>

@@ -61,11 +61,31 @@ button {
   font-family: var(--font-ui);
 }
 
+/* Slow gradient pan (EDITS.md round 5: landing page leans on motion rather
+   than raw colour strength now). background-size wider than the element so
+   the pan has room to travel; the gradient itself is unchanged. */
 .text-iridescent {
   background: linear-gradient(100deg, var(--violet), var(--teal) 40%, var(--rose) 68%, var(--gold));
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  animation: iridescent-pan 10s ease-in-out infinite alternate;
+}
+
+@keyframes iridescent-pan {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-iridescent {
+    animation: none;
+  }
 }
 
 .container {

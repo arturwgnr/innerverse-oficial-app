@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 import { api } from "../lib/api.js";
+import { pickLine } from "../lib/toastCopy.js";
 import { Oracle } from "../components/Oracle.jsx";
+import { AboutMeSkeleton } from "../components/Skeleton.jsx";
 
 export function AboutMe() {
   const { t, language } = useLanguage();
@@ -12,6 +15,10 @@ export function AboutMe() {
   const [showCorrectForm, setShowCorrectForm] = useState(false);
   const [correctionNote, setCorrectionNote] = useState("");
   const [sendingCorrection, setSendingCorrection] = useState(false);
+  const [daysAway, setDaysAway] = useState(null);
+  // Closing line variety (UPDATES.md round 5 #5): picked once per visit
+  // instead of the same two fixed sentences forever.
+  const closingLine = useMemo(() => pickLine(t.aboutMe.closingLines), [t]);
 
   useEffect(() => {
     // React StrictMode fires this effect twice in dev, so a stray failure
@@ -24,6 +31,18 @@ export function AboutMe() {
         setError(null);
       })
       .catch((err) => setError(err.message));
+
+    // Real gap since the last entry, not a hardcoded placeholder
+    // (UPDATES.md #6). Entries come back newest first.
+    api
+      .get("/api/entries")
+      .then((entries) => {
+        if (!entries?.length) return;
+        const last = new Date(entries[0].occurred_at);
+        const gapMs = Date.now() - last.getTime();
+        setDaysAway(Math.max(0, Math.floor(gapMs / (1000 * 60 * 60 * 24))));
+      })
+      .catch(() => {});
   }, []);
 
   async function handleSendCorrection(event) {
@@ -40,7 +59,7 @@ export function AboutMe() {
           })
         )
       );
-      showToast(t.aboutMe.correctionSent, "success");
+      showToast(pickLine(t.toasts.aboutMeCorrectionSent), "success");
       setShowCorrectForm(false);
       setCorrectionNote("");
     } catch (err) {
@@ -74,37 +93,41 @@ export function AboutMe() {
 
       {error && <p className="form-error">{error}</p>}
 
+      {!data && !error && <AboutMeSkeleton />}
+
       {data && (
         <>
-          <section className="about-me-column glass">
-            <p className="about-me-eyebrow">{t.aboutMe.light}</p>
-            <ul>
-              {data.light.map((item) => (
-                <li key={item.id}>
-                  <span className="about-me-dot about-me-dot-light" />
-                  <div>
-                    <strong>{item.title}</strong>
-                    <p>{item.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
+          <div className="about-me-columns">
+            <section className="about-me-column glass">
+              <p className="about-me-eyebrow">{t.aboutMe.light}</p>
+              <ul>
+                {data.light.map((item) => (
+                  <li key={item.id}>
+                    <span className="about-me-dot about-me-dot-light" />
+                    <div>
+                      <strong>{item.title}</strong>
+                      <p>{item.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-          <section className="about-me-column glass about-me-dark">
-            <p className="about-me-eyebrow">{t.aboutMe.dark}</p>
-            <ul>
-              {data.dark.map((item) => (
-                <li key={item.id}>
-                  <span className="about-me-dot about-me-dot-dark" />
-                  <div>
-                    <strong>{item.title}</strong>
-                    <p>{item.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
+            <section className="about-me-column glass about-me-dark">
+              <p className="about-me-eyebrow">{t.aboutMe.dark}</p>
+              <ul>
+                {data.dark.map((item) => (
+                  <li key={item.id}>
+                    <span className="about-me-dot about-me-dot-dark" />
+                    <div>
+                      <strong>{item.title}</strong>
+                      <p>{item.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
 
           {!showCorrectForm && (
             <button type="button" className="about-me-correct" onClick={() => setShowCorrectForm(true)}>
@@ -131,12 +154,24 @@ export function AboutMe() {
               </div>
             </form>
           )}
+
+          {/* History moved to its own page (UPDATES.md round 5 #5), organized
+              as cards with arrow navigation instead of an inline expandable
+              list that could grow without bound. */}
+          <Link to="/about-me/history" className="about-me-history-toggle">
+            {t.aboutMe.seePastReadings}
+            <span aria-hidden="true">→</span>
+          </Link>
         </>
       )}
 
       <section className="about-me-quote glass">
-        <p>{t.aboutMe.awayMessage.replace("{days}", "4")}</p>
-        <p className="about-me-quote-sub">{t.aboutMe.everyEntry}</p>
+        <p>
+          {daysAway !== null && daysAway >= 2 ? t.aboutMe.awayMessage.replace("{days}", daysAway) : closingLine.main}
+        </p>
+        <p className="about-me-quote-sub">
+          {daysAway !== null && daysAway >= 2 ? t.aboutMe.everyEntry : closingLine.sub}
+        </p>
       </section>
     </div>
   );

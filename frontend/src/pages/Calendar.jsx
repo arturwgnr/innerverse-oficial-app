@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { api } from "../lib/api.js";
 import { ScreenTitle } from "../components/AppShell.jsx";
+import { CalendarSkeleton } from "../components/Skeleton.jsx";
 
-const MOODS = ["radiant", "steady", "tender", "restless", "heavy", "numb"];
+const MOODS = [1, 2, 3, 4, 5, 6];
 const WEEKDAY_LETTERS = { en: ["M", "T", "W", "T", "F", "S", "S"], pt: ["S", "T", "Q", "Q", "S", "S", "D"] };
 
 function monthRange(date) {
@@ -34,18 +35,22 @@ export function Calendar() {
   const [tieBreakDay, setTieBreakDay] = useState(null);
   const [dayDetail, setDayDetail] = useState(null);
   const [overrides, setOverrides] = useState({});
+  // Distinct from "loaded, this month just has no entries yet" (EDITS.md
+  // round 2 #5): without this the grid always rendered immediately with
+  // mood-less cells, then colours popped in abruptly once the fetch
+  // resolved, no way to tell "still loading" apart from "genuinely empty".
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     const { from, to } = monthRange(month);
-    api
-      .get(`/api/entries?from=${from.toISOString()}&to=${to.toISOString()}`)
-      .then(setEntries)
-      .catch(() => setEntries([]));
-
-    api
-      .get(`/api/calendar-overrides?year=${month.getFullYear()}&month=${month.getMonth() + 1}`)
-      .then(setOverrides)
-      .catch(() => setOverrides({}));
+    Promise.all([
+      api.get(`/api/entries?from=${from.toISOString()}&to=${to.toISOString()}`).then(setEntries).catch(() => setEntries([])),
+      api
+        .get(`/api/calendar-overrides?year=${month.getFullYear()}&month=${month.getMonth() + 1}`)
+        .then(setOverrides)
+        .catch(() => setOverrides({})),
+    ]).finally(() => setLoading(false));
   }, [month]);
 
   async function resolveTieBreak(day, mood) {
@@ -111,46 +116,50 @@ export function Calendar() {
         </button>
       </div>
 
-      <div className="calendar-grid glass">
-        <div className="calendar-weekdays">
-          {WEEKDAY_LETTERS[language === "pt" ? "pt" : "en"].map((d, i) => (
-            <span key={i}>{d}</span>
-          ))}
-        </div>
-        <div className="calendar-cells">
-          {Array.from({ length: leadingBlanks }).map((_, i) => (
-            <div key={`blank-${i}`} className="calendar-cell empty" />
-          ))}
-          {Array.from({ length: daysInMonth }).map((_, i) => {
-            const dayNumber = i + 1;
-            const date = new Date(month.getFullYear(), month.getMonth(), dayNumber);
-            const key = dayKey(date);
-            const moods = byDay.get(key) || [];
-            const override = overrides[key];
-            const result = moods.length ? predominantMood(moods) : null;
-            const finalMood = override || result?.mood;
+      {loading ? (
+        <CalendarSkeleton />
+      ) : (
+        <div className="calendar-grid glass">
+          <div className="calendar-weekdays">
+            {WEEKDAY_LETTERS[language === "pt" ? "pt" : "en"].map((d, i) => (
+              <span key={i}>{d}</span>
+            ))}
+          </div>
+          <div className="calendar-cells">
+            {Array.from({ length: leadingBlanks }).map((_, i) => (
+              <div key={`blank-${i}`} className="calendar-cell empty" />
+            ))}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const dayNumber = i + 1;
+              const date = new Date(month.getFullYear(), month.getMonth(), dayNumber);
+              const key = dayKey(date);
+              const moods = byDay.get(key) || [];
+              const override = overrides[key];
+              const result = moods.length ? predominantMood(moods) : null;
+              const finalMood = override || result?.mood;
 
-            return (
-              <button
-                key={key}
-                type="button"
-                disabled={!finalMood}
-                className={`calendar-cell ${finalMood ? `mood-${finalMood}` : ""}`}
-                onClick={() => {
-                  if (result?.isDivergent && !override) {
-                    setTieBreakDay({ key, moods });
-                  } else if (finalMood) {
-                    setDayDetail({ key, entries: entriesByDay.get(key) || [] });
-                  }
-                }}
-              >
-                {dayNumber}
-                {result?.isDivergent && <span className="calendar-divergent-mark" />}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={!finalMood}
+                  className={`calendar-cell ${finalMood ? `mood-${finalMood}` : ""}`}
+                  onClick={() => {
+                    if (result?.isDivergent && !override) {
+                      setTieBreakDay({ key, moods });
+                    } else if (finalMood) {
+                      setDayDetail({ key, entries: entriesByDay.get(key) || [] });
+                    }
+                  }}
+                >
+                  {dayNumber}
+                  {result?.isDivergent && <span className="calendar-divergent-mark" />}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mood-legend">
         {MOODS.map((m) => (
@@ -162,8 +171,16 @@ export function Calendar() {
       </div>
 
       {dayDetail && (
-        <div className="sheet-backdrop" onClick={() => setDayDetail(null)}>
-          <div className="sheet glass" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop" onClick={() => setDayDetail(null)}>
+          <div className="modal glass" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => setDayDetail(null)}
+              aria-label={language === "pt" ? "Fechar" : "Close"}
+            >
+              ×
+            </button>
             <p className="about-me-eyebrow">{dayDetail.key}</p>
             <h2>{language === "pt" ? "O que foi escrito nesse dia" : "What was written that day"}</h2>
             <div className="day-detail-list">
@@ -173,7 +190,7 @@ export function Calendar() {
               {dayDetail.entries.map((entry) => (
                 <div key={entry.id} className="day-detail-entry">
                   <div className="day-detail-entry-head">
-                    <span className={`legend-dot mood-${entry.mood || "numb"}`} />
+                    <span className={`legend-dot mood-${entry.mood || 3}`} />
                     <span className="day-detail-moment">{t.moments[entry.moment]?.label || entry.moment}</span>
                     <span className="day-detail-time">
                       {new Date(entry.occurred_at).toLocaleTimeString(language === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" })}
@@ -198,8 +215,16 @@ export function Calendar() {
       )}
 
       {tieBreakDay && (
-        <div className="sheet-backdrop" onClick={() => setTieBreakDay(null)}>
-          <div className="sheet glass" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop" onClick={() => setTieBreakDay(null)}>
+          <div className="modal glass" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => setTieBreakDay(null)}
+              aria-label={language === "pt" ? "Fechar" : "Close"}
+            >
+              ×
+            </button>
             <p className="about-me-eyebrow">{tieBreakDay.key}</p>
             <h2>{language === "pt" ? "Esse dia puxou pra dois lados." : "This day pulled in two directions."}</h2>
             <p className="sheet-sub">

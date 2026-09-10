@@ -5,6 +5,32 @@ import { analyzeAboutMe, computeKnowledgePercent } from "../services/analysis.js
 
 const router = Router();
 
+// History browser (UPDATES.md round 4 #1): every past generation's light/dark
+// insights already sit in this table untouched, GET / only ever surfaced the
+// newest batch. Grouped by their shared generated_at timestamp (see the
+// write path below), oldest first is the natural chronicle order to read
+// forward, but this returns newest first so the frontend can decide.
+router.get("/history", requireAuth, async (req, res) => {
+  const { rows } = await pool.query(
+    `select id, kind, title, body, generated_at
+     from insights
+     where user_id = $1 and kind in ('about_me_light', 'about_me_dark')
+     order by generated_at desc`,
+    [req.user.id]
+  );
+
+  const byDate = new Map();
+  for (const row of rows) {
+    const key = row.generated_at.toISOString();
+    if (!byDate.has(key)) {
+      byDate.set(key, { generatedAt: row.generated_at, light: [], dark: [] });
+    }
+    byDate.get(key)[row.kind === "about_me_light" ? "light" : "dark"].push(row);
+  }
+
+  res.json({ generations: [...byDate.values()] });
+});
+
 router.get("/", requireAuth, async (req, res) => {
   const [{ rows: countRows }, { rows: profileMetaRows }] = await Promise.all([
     pool.query("select count(*)::int as count from entries where user_id = $1", [req.user.id]),

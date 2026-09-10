@@ -1,5 +1,9 @@
 /* Subtle noise on top of the nebula gradients, keeps it from reading as a flat
-   digital gradient (JOURNAL.md sec. 10). SVG feTurbulence, inlined as a data URI. */
+   digital gradient (JOURNAL.md sec. 10). SVG feTurbulence, inlined as a data URI.
+   Nudged slightly more perceptible (UPDATES.md "Repaginação de paleta": with
+   nebula.css's blobs toned down, this texture layer is doing more of the
+   "premium" work that raw saturation used to, so it earns a touch more
+   presence, opacity 0.5->0.56, inner rect 0.28->0.34, still subtle). */
 
 .grain::after {
   content: "";
@@ -7,9 +11,9 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.56;
   mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='0.28'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='0.34'/></svg>");
   background-size: 120px 120px;
 }
 

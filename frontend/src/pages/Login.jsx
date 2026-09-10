@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 import { GoogleIcon } from "../components/GoogleIcon.jsx";
@@ -8,7 +8,11 @@ import { signIn, signUp } from "../lib/authClient.js";
 export function Login() {
   const { t, language } = useLanguage();
   const { showToast } = useToast();
-  const [mode, setMode] = useState("signin");
+  const [searchParams] = useSearchParams();
+  // Landing's two CTAs ("Get started" vs "Log in") land here with a
+  // distinct ?mode= so they don't feel like the same button twice
+  // (UPDATES.md #1).
+  const [mode, setMode] = useState(searchParams.get("mode") === "signup" ? "signup" : "signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -24,8 +28,18 @@ export function Login() {
           : await signUp.email({ email, password, name: name || email.split("@")[0] });
 
       if (result.error) {
-        showToast(result.error.message, "error");
+        showToast(result.error.message || t.common.genericError, "error");
       } else {
+        // Read by Today.jsx right after this reload to fire an Oracle-voiced
+        // greeting (UPDATES.md round 4 #2). Only a sign-in, not a sign-up,
+        // greets, a brand-new account goes straight to onboarding instead.
+        if (mode === "signin") {
+          try {
+            window.localStorage.setItem("innerverse.justSignedIn", "1");
+          } catch {
+            // Greeting is a nice-to-have, sign-in itself already succeeded.
+          }
+        }
         // Full reload instead of a client-side navigate: useSession()'s cache
         // can lag a tick behind the sign-in/sign-up response, which would
         // otherwise bounce straight back to /login via RequireAuth before the
@@ -44,7 +58,13 @@ export function Login() {
   return (
     <div className="login-page nebula grain" data-moment="decompress">
       <div className="login-inner">
-        <Link to="/" className="login-brand">
+        {/* Reuses the landing nav's brand treatment directly (UPDATES.md
+            round 6 #3), centered, with the logo glyph, instead of a plain
+            left-aligned text link. */}
+        <Link to="/" className="login-brand landing-nav-brand">
+          <span className="landing-nav-logo" aria-hidden="true">
+            ✦
+          </span>
           {t.common.appName}
         </Link>
 

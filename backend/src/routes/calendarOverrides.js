@@ -5,8 +5,6 @@ import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
 
-const MOODS = ["radiant", "steady", "tender", "restless", "heavy", "numb"];
-
 // One row per divergent day the user has already resolved, so the calendar
 // does not ask the tie break question again on every visit.
 router.get("/", requireAuth, async (req, res) => {
@@ -26,7 +24,7 @@ router.get("/", requireAuth, async (req, res) => {
   res.json(overrides);
 });
 
-const overrideSchema = z.object({ day: z.string().date(), mood: z.enum(MOODS) });
+const overrideSchema = z.object({ day: z.string().date(), mood: z.number().int().min(1).max(6) });
 
 router.put("/", requireAuth, async (req, res) => {
   const parsed = overrideSchema.safeParse(req.body);

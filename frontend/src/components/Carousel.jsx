@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Children, useEffect, useRef, useState } from "react";
 
 // Swipeable/draggable (pointer events, works for touch and mouse alike) and
 // auto-advancing. Pauses auto-advance while the user is actively dragging or
@@ -12,7 +12,11 @@ import { useEffect, useRef, useState } from "react";
 const DRAG_THRESHOLD = 6;
 
 export function Carousel({ children, autoAdvanceMs = 6000 }) {
-  const items = Array.isArray(children) ? children : [children];
+  // Children.toArray flattens nested arrays (e.g. a slide list built with
+  // .map() sitting alongside a plain sibling element), a manual
+  // Array.isArray check does not, it would have rendered the whole mapped
+  // group as a single slide instead of one slide each.
+  const items = Children.toArray(children);
   const [index, setIndex] = useState(0);
   const [dragX, setDragX] = useState(0);
   const dragState = useRef(null);

@@ -1,7 +1,10 @@
 import { useLanguage } from "../context/LanguageContext.jsx";
 
 // Segmented control, not two bare buttons: a single surface track with one
-// active segment, flag plus a short label (CLAUDE.md language section).
+// active segment. Plain text labels only, no flag imagery (EDITS.md round 2
+// #1: the flag emoji don't render as flags on Windows, just raw glyph
+// characters, so a country flag was never a reliable way to indicate
+// language here to begin with).
 export function LanguageToggle() {
   const { language, setLanguage } = useLanguage();
 
@@ -14,8 +17,7 @@ export function LanguageToggle() {
         aria-pressed={language === "en"}
         title="English"
       >
-        <span className="language-flag">🇺🇸</span>
-        US
+        English
       </button>
       <button
         type="button"
@@ -24,8 +26,7 @@ export function LanguageToggle() {
         aria-pressed={language === "pt"}
         title="Português"
       >
-        <span className="language-flag">🇧🇷</span>
-        BR
+        Português
       </button>
     </div>
   );

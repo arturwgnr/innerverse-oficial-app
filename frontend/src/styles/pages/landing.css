@@ -8,6 +8,7 @@
      stuck or laggy. */
   scroll-snap-type: y proximity;
   overflow-y: auto;
+  overflow-x: hidden;
   height: 100dvh;
   background: var(--background);
 }
@@ -27,7 +28,9 @@
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out);
 }
 
 .reveal.in-view {
@@ -35,26 +38,110 @@
   transform: translateY(0);
 }
 
-/* Fixed nav, not its own section (matches the reference's <Nav />) */
+/* Fixed nav, not its own section. Inline and transparent over the hero's
+   nebula wash (references/landing_premium/inner-landing.png) while parked
+   there. Past that, .landing-nav-scrolled (toggled in Landing.jsx off
+   .landing's own scroll position, this container scrolls itself, not the
+   window) brings in a real glass surface so it reads as a bar sitting above
+   the content instead of nothing, and page text stops colliding with the
+   nav links once scrolled (EDITS.md round 2 #2). Edge-to-edge full width
+   always, not a floating pill (EDITS.md round 3, an earlier pass had it
+   shrink into a rounded pill on scroll, explicitly asked to be square and
+   full width instead): the outer bar spans the whole viewport, an inner
+   .container keeps the actual links/logo/CTA row centred and readable. */
 .landing-nav {
   position: fixed;
   top: 0;
-  left: 50%;
+  left: 0;
+  right: 0;
   z-index: 30;
-  transform: translateX(-50%);
-  width: min(1080px, 92vw);
+  transition: box-shadow 0.25s var(--ease-out);
+}
+
+.landing-nav-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-6);
   padding: var(--space-6) 0;
 }
 
+.landing-nav-scrolled .landing-nav-inner {
+  padding: var(--space-3) 0;
+}
+
+/* .glass (grain.css) sets its own rounded corners, overridden here: this bar
+   stays square, full width, never a pill. */
+.landing-nav-scrolled {
+  border-radius: 0;
+}
+
 .landing-nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: 1.15rem;
   letter-spacing: var(--tracking-tight);
   color: var(--foreground);
   text-decoration: none;
+}
+
+.landing-nav-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--violet) 26%, var(--surface));
+  color: var(--primary);
+  font-size: 0.95rem;
+}
+
+.landing-nav-links {
+  display: none;
+  align-items: center;
+  gap: var(--space-7);
+}
+
+.landing-nav-links a {
+  position: relative;
+  font-size: 0.9rem;
+  color: var(--foreground);
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.landing-nav-links a:hover {
+  opacity: 1;
+}
+
+/* Active-section indicator (UPDATES.md round 6 #2's visual pass): grows in
+   under whichever link matches the section currently in view (see
+   Landing.jsx's IntersectionObserver), a scaleX transform rather than a
+   width/left animation so it stays on the GPU-cheap transform/opacity path. */
+.landing-nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.landing-nav-links a.active {
+  opacity: 1;
+}
+
+.landing-nav-links a.active::after {
+  transform: scaleX(1);
 }
 
 .landing-nav-actions {
@@ -68,6 +155,47 @@
   font-size: 0.85rem;
 }
 
+@media (min-width: 780px) {
+  .landing-nav-links {
+    display: flex;
+  }
+}
+
+/* Below 780px the nav links are already hidden, but the logo, language
+   toggle and CTA alone still don't fit a narrow phone screen at their
+   normal size, this was overflowing the viewport horizontally instead of
+   wrapping. Icon-only toggle plus a tighter CTA closes the gap. */
+@media (max-width: 560px) {
+  /* flex-wrap as the safety net, not exact pixel budgeting: rather than
+     guess right up to the edge of every font's rendered width, let actions
+     drop to their own line if brand + toggle + CTA genuinely don't fit one
+     row, nothing gets clipped off-screen either way. */
+  .landing-nav {
+    flex-wrap: wrap;
+    row-gap: var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-4) 0;
+  }
+
+  .landing-nav-brand {
+    font-size: 1rem;
+  }
+
+  .landing-nav-actions {
+    margin-left: auto;
+  }
+
+  .landing-nav-cta {
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.78rem;
+  }
+
+  .landing-nav .language-toggle button {
+    padding: var(--space-1) var(--space-2);
+    font-size: 0.6rem;
+  }
+}
+
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.28em;
@@ -77,18 +205,43 @@
   margin: 0;
 }
 
+/* Pill-shaped variant with a small leading dot, matches the reference's
+   bordered hero badge rather than the plain eyebrow label used everywhere
+   else on the page. */
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-full);
+  letter-spacing: 0.14em;
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+}
+
+.hero-eyebrow-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
 /* Hero */
 .hero-grid {
   display: grid;
-  gap: var(--space-12);
+  gap: var(--space-10);
   align-items: center;
+  /* Clears the fixed nav (~82px tall) on short viewports where the section's
+     own vertical centering would otherwise sit hero content behind it. */
+  margin-top: var(--space-12);
 }
 
 .hero-title {
   margin-top: var(--space-5);
-  max-width: 22ch;
-  font-size: clamp(2.4rem, 5vw, 3.6rem);
-  line-height: 1.05;
+  max-width: 15ch;
+  font-size: clamp(2.6rem, 5.4vw, 4rem);
+  line-height: 1.08;
 }
 
 .hero-body {
@@ -105,24 +258,238 @@
   gap: var(--space-3);
 }
 
-.hero-cta-note {
-  margin: 0;
-  font-size: 0.8rem;
+.hero-cta-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  flex-wrap: wrap;
 }
 
-.hero-oracle-wrap {
+.hero-secondary-cta {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: opacity 0.15s ease;
+}
+
+.hero-secondary-cta:hover {
+  opacity: 0.75;
+}
+
+.hero-secondary-cta-arrow {
+  display: inline-block;
+  transition: transform 0.2s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-secondary-cta:hover .hero-secondary-cta-arrow {
+    transform: translateX(4px);
+  }
+}
+
+/* Single caption line, badges joined with a middle dot in the JSX rather
+   than separate list items (matches the reference's one-line credibility
+   strip under the CTA row). */
+.hero-caption {
+  margin: var(--space-6) 0 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+/* Framed preview card + floating "Today" bubble + Oracle, standing in for a
+   real product screenshot (references/landing_premium/inner-landing.png).
+   Built from the same CSS nebula technique as the rest of the page (JOURNAL.md
+   sec. 10), just tuned more vivid so it reads as a distinct "screenshot"
+   against the page's own much softer daylight background. */
+.hero-visual-wrap {
   display: flex;
   justify-content: center;
+}
+
+.hero-visual {
+  position: relative;
+  width: min(420px, 82vw);
+  /* Mouse-tracking tilt (UPDATES.md round 6 #2's "more interactive/
+     immersive" ask, set via Landing.jsx's onMouseMove/onMouseLeave), a
+     decorative touch, not a functional control, so a plain smoothing
+     transition on the frame below is enough, no spring library needed. */
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  perspective: 900px;
+}
+
+.hero-visual-frame {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-2xl);
+  background: var(--popover);
+  border: 10px solid var(--popover);
+  box-shadow: var(--shadow-lift);
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform 0.3s var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-visual-frame {
+    transform: none !important;
+    transition: none;
+  }
+}
+
+.hero-visual-frame::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  /* Toned down a notch (EDITS.md round 5: landing page colour intensity too
+     strong/heavy-handed overall). 55% mix + saturate(1.35) read as crude
+     rather than premium, especially stacked on the hero section's own
+     nebula wash behind it. Drift sped up in the same pass to lean on
+     motion, not raw colour strength, to carry the page's energy. */
+  background-image:
+    radial-gradient(
+      55% 45% at 18% 18%,
+      color-mix(in oklab, var(--gold) 38%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      60% 50% at 82% 28%,
+      color-mix(in oklab, var(--rose) 38%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      65% 55% at 62% 88%,
+      color-mix(in oklab, var(--violet) 38%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      55% 45% at 12% 85%,
+      color-mix(in oklab, var(--teal) 38%, transparent),
+      transparent 68%
+    );
+  filter: blur(30px) saturate(1.1);
+  animation: nebula-drift 26s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-visual-frame::before {
+    animation: none;
+  }
+}
+
+/* Widened again (UPDATES.md round 6 #2, was 260px). Back at its original
+   top-right spot (round 6 #2 had moved it down to dodge the mascot when
+   that briefly lived in this same corner, the mascot is back at bottom-left
+   now, see .hero-visual-oracle, so there's nothing to dodge). */
+.hero-visual-bubble {
+  position: absolute;
+  top: 6%;
+  right: -6%;
+  z-index: 2;
+  max-width: 320px;
+  padding: var(--space-4) var(--space-5);
+}
+
+.hero-visual-bubble-label {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  /* The day-word (Today/Yesterday/Tomorrow) gets its own accent colour,
+     set apart from the quote under it rather than reading as one grey
+     block (EDITS.md round 3). */
+  color: var(--primary);
+  opacity: 1;
+  transition: opacity 300ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+  }
+}
+
+.hero-visual-bubble-quote {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: var(--foreground);
+  opacity: 1;
+  transition: opacity 300ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+  }
+}
+
+/* Moved to the frame's top-right corner, enlarged, and given a slight right
+   tilt (UPDATES.md round 6 #2), like a mascot sticker peeking over the edge
+   of the screenshot rather than standing at its bottom-left. Sits above the
+   bubble in stacking order (higher z-index) since the two now share that
+   corner. */
+/* Back at the frame's bottom-left corner, upright, no tilt (follow-up fix:
+   the enlarge-and-move-to-top-right-with-a-tilt treatment from round 6 #2
+   read as leaning/off instead of a deliberate sticker, reverted to
+   straight). Enlarged size (190) kept, only position and rotation changed. */
+.hero-visual-oracle {
+  position: absolute;
+  left: -8%;
+  right: auto;
+  top: auto;
+  bottom: -8%;
+  z-index: 2;
+  transform: none;
+  transition: transform 0.3s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-visual-wrap:hover .hero-visual-oracle {
+    transform: scale(1.04);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-visual-bubble {
+    top: 4%;
+    right: -3%;
+    max-width: 220px;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .hero-visual-oracle {
+    left: -3%;
+    bottom: -6%;
+    --oracle-size: 120px !important;
+  }
 }
 
 @media (min-width: 860px) {
   .hero-grid {
     grid-template-columns: 1.1fr 0.9fr;
   }
+}
 
-  .hero-oracle-wrap {
-    justify-content: flex-end;
-  }
+/* Toned down a notch from the shared .nebula::before default (EDITS.md
+   round 5: landing page colour intensity too strong/heavy-handed overall,
+   lean more into animation instead). Same mix percentages as the
+   dashboard's own scoped-down .app-shell.nebula::before, beats the shared
+   rule on specificity regardless of import order. Drift sped up rather than
+   left at the shared 42s, so the softer wash still reads as alive. */
+/* Rebalanced (UPDATES.md "Repaginação de paleta"), same spirit as the shared
+   .nebula::before: a real cut from the old 40-48% mix, landing sections can
+   still afford a bit more presence than the daily app-shell screens since
+   they're a one-time impression, not something stared at all day. */
+.hero-section.nebula::before,
+.oracle-section.nebula::before {
+  background-image: radial-gradient(60% 42% at 18% 8%, color-mix(in oklab, var(--tone-1) 28%, transparent), transparent 70%),
+    radial-gradient(55% 40% at 88% 14%, color-mix(in oklab, var(--tone-3) 32%, transparent), transparent 72%),
+    radial-gradient(60% 45% at 78% 82%, color-mix(in oklab, var(--tone-2) 32%, transparent), transparent 74%),
+    radial-gradient(50% 38% at 12% 88%, color-mix(in oklab, var(--tone-1) 26%, transparent), transparent 68%);
+  animation-duration: 30s;
 }
 
 /* Why journaling works, plain background, no nebula (matches reference) */
@@ -148,6 +515,125 @@
   margin-top: var(--space-7);
   font-size: 1.05rem;
   color: var(--foreground);
+}
+
+/* Breaks out of .why-content's narrower 720px prose column: three cards
+   read cramped at that width, the rest of the section (eyebrow, headline,
+   lede) stays centered and narrow on purpose for readability. */
+.why-features {
+  margin-top: var(--space-10);
+  width: min(960px, 92vw);
+  margin-left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+  text-align: left;
+}
+
+@media (min-width: 720px) {
+  .why-features {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* More modern/interactive hover (user follow-up): each card gets its own
+   accent (gold/rose/violet, matching the hero frame's own palette) instead
+   of all three sharing --tone-1, a gradient wash sweeps in behind the card
+   on hover (same technique as .moment-preview-card below), and the icon
+   gets its own bouncy pop instead of just riding the card's flat lift. */
+.why-feature-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: var(--space-6);
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.why-feature-card:nth-child(1) {
+  --feature-accent: var(--gold);
+}
+.why-feature-card:nth-child(2) {
+  --feature-accent: var(--rose);
+}
+.why-feature-card:nth-child(3) {
+  --feature-accent: var(--violet);
+}
+
+.why-feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  background-image: radial-gradient(
+    70% 65% at 15% -10%,
+    color-mix(in oklab, var(--feature-accent, var(--tone-1)) 40%, transparent),
+    transparent 72%
+  );
+  transition: opacity 0.35s ease;
+}
+
+.why-feature-card:hover::before {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .why-feature-card:hover::before {
+    animation: nebula-drift 8s ease-in-out infinite alternate;
+  }
+}
+
+.why-feature-card:hover {
+  box-shadow: var(--shadow-lift);
+  border-color: color-mix(in oklab, var(--feature-accent, var(--tone-1)) 45%, var(--surface-border));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .why-feature-card:hover {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-feature-card::before {
+    animation: none !important;
+  }
+}
+
+.why-feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--feature-accent, var(--tone-1)) 22%, var(--surface));
+  font-size: 1.1rem;
+  color: var(--foreground);
+  transition:
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .why-feature-card:hover .why-feature-icon {
+    transform: scale(1.15) rotate(-8deg);
+    background: color-mix(in oklab, var(--feature-accent, var(--tone-1)) 38%, var(--surface));
+  }
+}
+
+.why-feature-card h3 {
+  margin: var(--space-4) 0 0;
+  font-size: 1.05rem;
+}
+
+.why-feature-card p {
+  margin: var(--space-2) 0 0;
+  font-size: 0.85rem;
 }
 
 /* Four moments */
@@ -179,9 +665,135 @@
   }
 }
 
+/* Neutral at rest, a moment-specific wash only appears on hover (UPDATES.md
+   round 3 #6.1): morning reads like dawn breaking on the card (warm gold/rose
+   sweeping up from one corner), afternoon like open daytime (brighter, more
+   evenly lit), night like nightfall settling in (deeper violet, dimmer),
+   decompress like the cosmos/mascot theme (the richest, most saturated of
+   the four, since it's the "no structure, just the Oracle" moment). Reuses
+   each moment's own --tone-1/2/3 (tokens.css [data-moment]) already set via
+   this card's data-moment attribute, so "morning" here is the same warm gold
+   as everywhere else morning shows up in the app, not a bespoke one-off. */
 .moment-preview-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding: var(--space-5);
   height: 100%;
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.moment-preview-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  background-image:
+    radial-gradient(
+      75% 65% at 12% -10%,
+      color-mix(in oklab, var(--tone-1) 55%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      65% 55% at 105% 105%,
+      color-mix(in oklab, var(--tone-2) 45%, transparent),
+      transparent 72%
+    );
+  transition: opacity 0.4s ease;
+}
+
+.moment-preview-card[data-moment="decompress"]::before {
+  background-image:
+    radial-gradient(
+      75% 65% at 12% -10%,
+      color-mix(in oklab, var(--tone-1) 68%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      70% 60% at 105% 105%,
+      color-mix(in oklab, var(--tone-2) 60%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      50% 45% at 50% 50%,
+      color-mix(in oklab, var(--tone-3) 40%, transparent),
+      transparent 75%
+    );
+}
+
+.moment-preview-card:hover {
+  box-shadow: var(--shadow-lift);
+  border-color: color-mix(in oklab, var(--tone-1) 45%, var(--surface-border));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .moment-preview-card:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.moment-preview-card:hover::before {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* Alive, not just a colour fade (EDITS.md round 2 #2): the wash drifts
+     slowly while hovered, same nebula-drift keyframe (nebula.css) the rest
+     of the app's ambient backgrounds already use. */
+  .moment-preview-card:hover::before {
+    animation: nebula-drift 8s ease-in-out infinite alternate;
+  }
+}
+
+/* Night gets actual stars, not just a darker wash (EDITS.md round 2 #2's
+   explicit call-out). A second layer so the twinkle animation can run
+   independently of the tone wash's own drift. */
+.moment-preview-card[data-moment="night"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, white, transparent),
+    radial-gradient(1.5px 1.5px at 65% 15%, white, transparent),
+    radial-gradient(1px 1px at 80% 55%, white, transparent),
+    radial-gradient(1.5px 1.5px at 40% 75%, white, transparent),
+    radial-gradient(1px 1px at 90% 85%, white, transparent),
+    radial-gradient(1px 1px at 12% 88%, white, transparent);
+  transition: opacity 0.4s ease;
+}
+
+.moment-preview-card[data-moment="night"]:hover::after {
+  opacity: 0.85;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .moment-preview-card[data-moment="night"]:hover::after {
+    animation: star-twinkle 2.2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moment-preview-card::before,
+  .moment-preview-card::after {
+    transition: none;
+    animation: none !important;
+  }
 }
 
 .moment-preview-window {
@@ -200,6 +812,27 @@
 .moment-preview-card p:last-child {
   margin: var(--space-2) 0 0;
   font-size: 0.8rem;
+}
+
+/* The six mood colors get their only landing page appearance here, reusing
+   the same .mood-legend/.legend-item/.legend-dot markup as the Calendar
+   page (styles/pages/app-pages.css) so a visitor already recognizes it once
+   they sign up, instead of learning a second, landing-only mood swatch. */
+.moments-mood-legend-wrap {
+  margin-top: var(--space-10);
+  text-align: center;
+}
+
+.moments-mood-legend-label {
+  margin: 0 0 var(--space-3);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted-foreground);
+}
+
+.moments-mood-legend-wrap .mood-legend {
+  justify-content: center;
 }
 
 /* Clean mirror, now a live interactive demo instead of static prose */
@@ -232,6 +865,13 @@
 
 .mirror-demo-entry {
   padding: var(--space-6);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mirror-demo-entry:hover {
+    transform: translateY(-3px);
+  }
 }
 
 .mirror-demo-entry-text {
@@ -268,7 +908,7 @@
   border-top: 1px solid var(--surface-border);
   font-size: 0.85rem !important;
   color: var(--foreground) !important;
-  animation: toast-in 0.3s ease-out;
+  animation: reveal-in 220ms var(--ease-out);
 }
 
 @media (min-width: 780px) {
@@ -288,7 +928,9 @@
   }
 }
 
-/* Oracle section */
+/* Oracle section, reverted to its original two-column grid (UPDATES.md
+   round 6 #2: round 5 #2's tilted corner-sticker treatment was meant for
+   the hero mascot instead, see .hero-visual-oracle below). */
 .oracle-grid {
   display: grid;
   gap: var(--space-10);
@@ -300,10 +942,48 @@
   justify-content: center;
 }
 
+/* More visual weight than a bare floating mascot (UPDATES.md round 3 #6.3):
+   the Oracle stands on its own framed "stage" instead of sitting directly
+   on the section's own nebula background, same nebula/grain technique as
+   the hero's preview card, giving the two matching, deliberate treatments
+   applied at different points on the page rather than one being an
+   afterthought. */
+.oracle-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(320px, 78vw);
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Toned down from the shared .nebula::before default (EDITS.md round 5):
+   full strength here was stacking on top of .oracle-section's own wash
+   right behind the mascot, in a box this small it read as a muddy blob
+   rather than a stage. Faster drift keeps it feeling just as alive. */
+.oracle-stage.nebula::before {
+  background-image: radial-gradient(60% 42% at 18% 8%, color-mix(in oklab, var(--tone-1) 30%, transparent), transparent 70%),
+    radial-gradient(55% 40% at 88% 14%, color-mix(in oklab, var(--tone-3) 36%, transparent), transparent 72%),
+    radial-gradient(60% 45% at 78% 82%, color-mix(in oklab, var(--tone-2) 36%, transparent), transparent 74%),
+    radial-gradient(50% 38% at 12% 88%, color-mix(in oklab, var(--tone-1) 28%, transparent), transparent 68%);
+  animation-duration: 22s;
+}
+
 .oracle-quote {
   margin-top: var(--space-5);
   max-width: 32rem;
   padding: var(--space-7);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .oracle-quote:hover {
+    transform: translateY(-3px);
+  }
 }
 
 .oracle-quote p {
@@ -339,6 +1019,25 @@
   max-width: 40ch;
 }
 
+.closing-cta-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.closing-signin {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 0.15s ease;
+}
+
+.closing-signin:hover {
+  color: var(--foreground);
+}
+
 /* Footer, not a 100dvh section, professional close of the page */
 .landing-footer {
   border-top: 1px solid var(--border);
@@ -358,11 +1057,33 @@
   font-size: 0.85rem;
 }
 
-.footer-links {
+.footer-brand .footer-promise {
+  margin-top: var(--space-2);
+}
+
+/* Two link columns (Explore, Account) instead of one flat row (UPDATES.md
+   round 3 #6.4), reads as a real site footer rather than a single afterthought
+   line of links. */
+.footer-nav-columns {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-8);
+  gap: var(--space-10);
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   font-size: 0.85rem;
+}
+
+.footer-links-heading {
+  margin: 0 0 var(--space-1);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted-foreground);
+  opacity: 0.8;
 }
 
 .footer-links a {
@@ -375,10 +1096,36 @@
   color: var(--foreground);
 }
 
-.footer-bottom {
+.footer-bottom-row {
   margin-top: var(--space-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.footer-bottom {
+  margin: 0;
   font-size: 0.75rem;
   color: var(--muted-foreground);
+}
+
+.footer-promise {
+  margin: 0;
+  font-size: 0.75rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+.footer-top-link {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footer-top-link:hover {
+  color: var(--foreground);
 }
 
 @media (min-width: 640px) {
@@ -386,5 +1133,11 @@
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
+  }
+
+  .footer-bottom-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 }

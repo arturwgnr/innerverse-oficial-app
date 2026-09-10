@@ -8,6 +8,13 @@
   margin-bottom: var(--space-6);
 }
 
+.today-greeting {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--foreground);
+}
+
 .today-date {
   margin: 0;
   font-size: 0.7rem;
@@ -49,6 +56,12 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--space-2);
   margin-bottom: var(--space-6);
+  opacity: 1;
+  transition: opacity 160ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+  }
 }
 
 .moment-switcher button {
@@ -64,7 +77,9 @@
 }
 
 .moment-switcher button.active {
-  box-shadow: var(--shadow-soft), 0 0 0 1px var(--ring);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 1px var(--ring);
 }
 
 .moment-switcher-label {
@@ -113,11 +128,18 @@
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-.shortcut-card:hover {
-  transform: translateY(-2px);
+/* Gated behind hover:hover (emil-design-eng): touch devices fire :hover on
+   tap with no matching "unhover", a lifted card that never settles back down
+   reads as stuck, not responsive. Real mice/trackpads still get the lift. */
+@media (hover: hover) and (pointer: fine) {
+  .shortcut-card:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .shortcut-card:disabled {
@@ -177,24 +199,42 @@
   margin-bottom: var(--space-5);
 }
 
+/* Contrast/modernity pass (UPDATES.md round 4 #3): these used to be flat
+   muted-foreground text with no background, reading as unstyled placeholder
+   chrome against the app's tinted surfaces. Both now sit on a real --surface
+   pill with a token-based border, matching the rest of the design system
+   instead of looking hardcoded on top of it. */
 .entry-back {
-  background: none;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-full);
   color: var(--muted-foreground);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  padding: 0;
+  padding: var(--space-1) var(--space-3);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .entry-back:hover {
-  color: var(--foreground);
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 .entry-moment-label {
-  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.24em;
-  color: var(--muted-foreground);
+  letter-spacing: 0.2em;
+  color: var(--accent-foreground);
+  background: var(--accent);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
 }
 
 .retro-pill {
@@ -221,12 +261,12 @@
 .entry-date-input {
   align-self: flex-start;
   margin-bottom: var(--space-4);
-  border: 1px solid var(--border);
-  background: transparent;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
   border-radius: var(--radius-md);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-2) var(--space-3);
   font-size: 0.8rem;
-  color: var(--muted-foreground);
+  color: var(--foreground);
 }
 
 .entry-prompt-card {
@@ -293,7 +333,11 @@
   width: 100%;
   margin-bottom: var(--space-4);
   padding: var(--space-5);
-  resize: vertical;
+  /* No manual resize handle (UPDATES.md round 4 #2): dragging it left the
+     layout feeling loose and undesigned, height is fixed by min-height
+     instead, the field grows with content some other way if that's ever
+     needed, not by a corner drag. */
+  resize: none;
   min-height: 180px;
 }
 
@@ -316,15 +360,80 @@
   gap: var(--space-2);
   padding: var(--space-5) var(--space-2);
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fast-mood-cell:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .fast-mood-cell:active {
   transform: scale(0.97);
 }
 
-.fast-mood-cell.active {
-  box-shadow: var(--shadow-soft), 0 0 0 2px var(--ring);
+/* A soft tinted wash of each mood's own colour into the glass surface at
+   rest, a fuller tint plus a matching glow once picked, same language as
+   the .mood-chip picker elsewhere. Mood classes keyed by position (1-6,
+   UPDATES.md round 3 #2's ordered scale) instead of the old poetic names. */
+.fast-mood-cell.mood-tint-1 {
+  background: color-mix(in oklab, var(--mood-1) 16%, var(--surface));
+}
+.fast-mood-cell.mood-tint-2 {
+  background: color-mix(in oklab, var(--mood-2) 16%, var(--surface));
+}
+.fast-mood-cell.mood-tint-3 {
+  background: color-mix(in oklab, var(--mood-3) 16%, var(--surface));
+}
+.fast-mood-cell.mood-tint-4 {
+  background: color-mix(in oklab, var(--mood-4) 16%, var(--surface));
+}
+.fast-mood-cell.mood-tint-5 {
+  background: color-mix(in oklab, var(--mood-5) 16%, var(--surface));
+}
+.fast-mood-cell.mood-tint-6 {
+  background: color-mix(in oklab, var(--mood-6) 16%, var(--surface));
+}
+
+.fast-mood-cell.mood-tint-1.active {
+  background: color-mix(in oklab, var(--mood-1) 38%, var(--surface));
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-1) 70%, var(--foreground));
+}
+.fast-mood-cell.mood-tint-2.active {
+  background: color-mix(in oklab, var(--mood-2) 38%, var(--surface));
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-2) 70%, var(--foreground));
+}
+.fast-mood-cell.mood-tint-3.active {
+  background: color-mix(in oklab, var(--mood-3) 38%, var(--surface));
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-3) 70%, var(--foreground));
+}
+.fast-mood-cell.mood-tint-4.active {
+  background: color-mix(in oklab, var(--mood-4) 38%, var(--surface));
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-4) 70%, var(--foreground));
+}
+.fast-mood-cell.mood-tint-5.active {
+  background: color-mix(in oklab, var(--mood-5) 38%, var(--surface));
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-5) 70%, var(--foreground));
+}
+.fast-mood-cell.mood-tint-6.active {
+  background: color-mix(in oklab, var(--mood-6) 38%, var(--surface));
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-6) 70%, var(--foreground));
 }
 
 .fast-mood-glyph {
@@ -350,25 +459,56 @@
   color: var(--muted-foreground);
 }
 
-.fast-bullets {
+.fast-reasons-sub {
+  margin: 0 0 var(--space-4);
+  font-size: 0.8rem;
+}
+
+.fast-reasons {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.fast-reason-chip {
+  border: none;
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.85rem;
+  color: var(--foreground);
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fast-reason-chip:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.fast-reason-chip:active {
+  transform: scale(0.98);
+}
+
+.fast-reason-chip.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-soft);
+}
+
+.fast-add-reason {
+  display: flex;
   gap: var(--space-2);
   margin-bottom: var(--space-5);
 }
 
-.fast-bullets input {
+.fast-add-reason input {
+  flex: 1;
   border: none;
-}
-
-.fast-add-bullet {
-  align-self: flex-start;
-  background: none;
-  border: none;
-  color: var(--primary);
-  font-size: 0.8rem;
-  cursor: pointer;
-  padding: var(--space-1) 0;
 }
 
 .fast-save {
@@ -427,33 +567,39 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: inherit;
   font-size: 0.75rem;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
   position: relative;
   transition: transform 0.1s ease;
 }
 
-/* Compound selectors, not just .mood-radiant etc: those single-class rules
-   live in components.css (shared with Fast/Today's mood chips) and lose the
-   cascade to this file's own .calendar-cell background at equal
-   specificity, since this file is imported later. This was why a logged
-   mood never actually showed a colour on the calendar. */
-.calendar-cell.mood-radiant {
-  background: var(--mood-radiant);
+/* Compound selectors, not just .mood-1 etc: those single-class rules live in
+   components.css (shared with Fast/Today's mood chips) and lose the cascade
+   to this file's own .calendar-cell background at equal specificity, since
+   this file is imported later. This was why a logged mood never actually
+   showed a colour on the calendar. Keyed by position (1-6, UPDATES.md round
+   3 #2's ordered scale) instead of the old poetic names. */
+.calendar-cell.mood-1 {
+  background: var(--mood-1);
 }
-.calendar-cell.mood-steady {
-  background: var(--mood-steady);
+.calendar-cell.mood-2 {
+  background: var(--mood-2);
 }
-.calendar-cell.mood-tender {
-  background: var(--mood-tender);
+.calendar-cell.mood-3 {
+  background: var(--mood-3);
 }
-.calendar-cell.mood-restless {
-  background: var(--mood-restless);
+.calendar-cell.mood-4 {
+  background: var(--mood-4);
 }
-.calendar-cell.mood-heavy {
-  background: var(--mood-heavy);
+.calendar-cell.mood-5 {
+  background: var(--mood-5);
 }
-.calendar-cell.mood-numb {
-  background: var(--mood-numb);
+.calendar-cell.mood-6 {
+  background: var(--mood-6);
 }
 
 .calendar-cell:not(:disabled) {
@@ -500,28 +646,6 @@
   width: 10px;
   height: 10px;
   border-radius: var(--radius-full);
-}
-
-/* Bottom sheet (calendar day tie break), matches the reference's fixed
-   bottom overlay rather than a centered dialog. */
-.sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  background: oklch(0.28 0.028 285 / 0.25);
-  backdrop-filter: blur(4px);
-  padding: 0 var(--space-4) var(--space-6);
-}
-
-.sheet {
-  width: 100%;
-  max-width: 400px;
-  max-height: 80vh;
-  overflow-y: auto;
-  padding: var(--space-6);
 }
 
 .day-detail-list {
@@ -594,55 +718,304 @@
   cursor: pointer;
 }
 
-/* Patterns, matches /references/dashboard's patterns.tsx */
-.patterns-summary {
+/* Analysis: day-grouped timeline of deep, per-entry analyses (replaces the
+   old cross-entry Patterns concept entirely, see CLAUDE.md/UPDATES.md). */
+.analysis-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.analysis-day-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* History Mode's chapter framing (UPDATES.md round 3 #2): a small ornamental
+   marker above each day, reads as a chronicle heading instead of a bare
+   timestamp. */
+.analysis-chapter-mark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  opacity: 0.75;
+}
+
+.analysis-day-header {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted-foreground);
+  margin: 0 0 var(--space-1);
+}
+
+.analysis-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.analysis-filters select {
+  border: none;
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.analysis-card {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.analysis-card h3 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* Mood shown as its own tag next to the title, not folded into the prose
+   (EDITS.md round 2 #4): reuses the same mood-N colour token as the
+   calendar/Fast mode, so a Radiant day and a Down day are visibly different
+   at a glance without the analysis text having to say so awkwardly. */
+.analysis-card-head {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-4);
-  padding: var(--space-6);
-  margin-bottom: var(--space-3);
-}
-
-.patterns-summary p {
-  margin: 0;
-  color: var(--foreground);
-  font-size: 0.9rem;
-}
-
-.pattern-cards {
-  display: grid;
+  justify-content: space-between;
   gap: var(--space-3);
 }
 
-.pattern-card {
-  padding: var(--space-6);
+.analysis-card-head h3 {
+  flex: 1;
 }
 
-.pattern-category {
-  text-transform: uppercase;
+.analysis-mood-badge {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
   font-size: 0.7rem;
-  letter-spacing: 0.24em;
-  color: var(--primary);
+  font-weight: 600;
+  color: var(--foreground);
+  white-space: nowrap;
+}
+
+/* Pause/mindfulness entries get the same badge treatment as a mood tag
+   (UPDATES.md round 6 #1), just its own calm violet tint instead of a
+   mood-N colour, since these entries never carry a mood value. */
+.analysis-mindfulness-badge {
+  background: color-mix(in oklab, var(--violet) 32%, var(--surface));
+}
+
+/* Pending / failed placeholders, distinct from a real analysis card so
+   "still working on it" and "the model failed" never look like the same
+   empty state as "nothing was ever attempted" (UPDATES.md #5). */
+.analysis-card-pending {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+}
+
+/* Failed card grew a real action row (UPDATES.md round 4 #3: view the entry,
+   retry, or dismiss), so it's a column now instead of the single-line
+   pending layout it used to share. */
+.analysis-card-failed {
+  position: relative;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+}
+
+.analysis-card-pending p,
+.analysis-card-failed p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.analysis-card-dismiss {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.analysis-card-dismiss:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.analysis-failed-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Quieter, more modern pair (UPDATES.md round 5 #4) than the global
+   button-ghost/button-secondary pills, scaled down for this compact card
+   context: a plain ghost label for the non-destructive "view", a small
+   accent-tinted pill for the primary "retry" action. */
+.analysis-failed-actions button {
+  font-family: var(--font-ui);
   font-weight: 500;
+  font-size: 0.78rem;
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
 }
 
-.pattern-card h3 {
-  font-size: 1.2rem;
-  margin: var(--space-2) 0 0;
+.analysis-action-view {
+  background: transparent;
+  color: var(--muted-foreground);
 }
 
-.pattern-meta {
+.analysis-action-view:hover {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+}
+
+.analysis-action-retry {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.analysis-action-retry:hover {
+  background: color-mix(in oklab, var(--accent) 82%, var(--primary));
+}
+
+.analysis-action-retry:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .analysis-failed-actions button:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+}
+
+.analysis-failed-actions button:active {
+  transform: scale(0.97);
+}
+
+/* Week-by-week navigation (UPDATES.md round 5 #4). */
+.analysis-week-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
-.pattern-confidence {
-  font-size: 0.65rem;
+.analysis-week-label {
+  min-width: 11ch;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--muted-foreground);
+}
+
+.analysis-week-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--foreground);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.analysis-week-arrow:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.analysis-week-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.analysis-pending-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  animation: analysis-pending-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes analysis-pending-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.analysis-observations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.analysis-observation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.analysis-observation:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.analysis-observation p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--foreground);
+}
+
+.analysis-limit-note {
+  margin-bottom: var(--space-4);
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  text-align: center;
 }
 
 .correction-buttons {
@@ -658,6 +1031,28 @@
   color: var(--muted-foreground);
   font-size: 0.7rem;
   cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.correction-buttons button:hover {
+  /* Brand-tinted border shift (UPDATES.md round 6 #4), not a plain
+     foreground darken, consistent with the accent-mix hover treatment used
+     elsewhere in the app. */
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  color: var(--foreground);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .correction-buttons button:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.correction-buttons button:active {
+  transform: scale(0.96);
 }
 
 .correction-buttons button.accent {
@@ -670,12 +1065,6 @@
   background: var(--primary);
   color: var(--primary-foreground);
   border-color: transparent;
-}
-
-.patterns-footnote {
-  margin-top: var(--space-5);
-  text-align: center;
-  font-size: 0.7rem;
 }
 
 /* About me, matches /references/dashboard's oracle.tsx */
@@ -720,6 +1109,11 @@
 .knowledge-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--violet), var(--teal), var(--gold));
+}
+
+.about-me-columns {
+  display: flex;
+  flex-direction: column;
 }
 
 .about-me-column {
@@ -773,19 +1167,136 @@
 }
 
 .about-me-correct {
+  margin-top: 20px;
   width: 100%;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  background: transparent;
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
   color: var(--muted-foreground);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   cursor: pointer;
   margin-bottom: var(--space-3);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .about-me-correct:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: transparent;
+}
+
+/* Now a <Link> to its own page (UPDATES.md round 5 #5), not an inline
+   expand/collapse toggle, text-decoration reset since it's an anchor. */
+.about-me-history-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--surface-border);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  text-decoration: none;
+  cursor: pointer;
+  margin-bottom: var(--space-4);
+  transition: color 0.15s ease;
+}
+
+.about-me-history-toggle:hover {
   color: var(--foreground);
+}
+
+.about-me-history-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.about-me-history-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  margin-bottom: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-full);
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  text-decoration: none;
+  padding: var(--space-1) var(--space-3);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.about-me-history-back:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.about-me-history-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.about-me-history-nav-label {
+  min-width: 16ch;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.about-me-history-entry {
+  padding: var(--space-6);
+}
+
+.about-me-history-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.about-me-history-heading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted-foreground);
+  margin-bottom: var(--space-2);
+}
+
+.about-me-history-columns ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.about-me-history-columns li strong {
+  display: block;
+  font-size: 0.85rem;
+}
+
+.about-me-history-columns li p {
+  margin: var(--space-1) 0 0;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 520px) {
+  .about-me-history-columns {
+    grid-template-columns: 1fr;
+  }
 }
 
 .about-me-quote {
@@ -797,6 +1308,55 @@
   margin: 0;
   color: var(--foreground);
   font-size: 0.9rem;
+}
+
+/* Desktop density pass (UPDATES.md #7): the app shell widening (see
+   components.css) only helps if what sits inside it actually uses the
+   extra room instead of just adding side margins, so the highest traffic
+   screens get their own scale-up here too. */
+@media (min-width: 860px) {
+  .today-moment-label {
+    font-size: 2.8rem;
+  }
+
+  .moment-switcher {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .arrival-card {
+    padding: var(--space-8);
+  }
+
+  .arrival-card h2 {
+    font-size: 2rem;
+  }
+
+  .about-me-hero h1 {
+    font-size: 2.6rem;
+  }
+
+  .about-me-hero-sub {
+    max-width: 42ch;
+    font-size: 0.95rem;
+  }
+
+  .about-me-columns {
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+
+  .about-me-column {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
+  .calendar-cell {
+    font-size: 0.9rem;
+  }
+
+  .analysis-card h3 {
+    font-size: 1.1rem;
+  }
 }
 
 .about-me-quote-sub {
@@ -821,4 +1381,186 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);
+}
+
+/* Settings (EDITS.md round 2 #1's navigation overhaul). */
+.settings-section {
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.settings-section h2 {
+  font-size: 1.05rem;
+  margin: 0 0 var(--space-4);
+}
+
+.settings-section form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.settings-field input {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  font-size: 0.9rem;
+  color: var(--foreground);
+}
+
+.settings-field input:disabled {
+  opacity: 0.6;
+}
+
+.settings-language-field {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Stats (EDITS.md round 2 #1's navigation overhaul): plain CSS bar charts,
+   no charting library, consistent with the rest of the app staying
+   dependency-light. */
+.stats-summary-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.stats-summary-card {
+  padding: var(--space-5);
+  text-align: center;
+}
+
+.stats-summary-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--foreground);
+}
+
+.stats-summary-label {
+  margin: var(--space-1) 0 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.stats-chart-card {
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.stats-chart-card h2 {
+  font-size: 0.95rem;
+  margin: 0 0 var(--space-5);
+}
+
+.stats-bar-chart-horizontal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.stats-hbar-row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr 2ch;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.stats-hbar-label {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.stats-hbar-track {
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--muted) 70%, transparent);
+  overflow: hidden;
+}
+
+.stats-hbar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 400ms var(--ease-out);
+}
+
+.stats-hbar-count {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-align: right;
+}
+
+.stats-bar-chart-vertical {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  height: 160px;
+}
+
+.stats-weekly {
+  gap: var(--space-2);
+}
+
+.stats-vbar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  height: 100%;
+}
+
+.stats-vbar-count {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+
+.stats-vbar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: color-mix(in oklab, var(--muted) 70%, transparent);
+}
+
+.stats-vbar-fill {
+  width: 100%;
+  min-height: 3px;
+  background: var(--primary);
+  transition: height 400ms var(--ease-out);
+}
+
+.stats-vbar-label {
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* "Menu" screens read a bit darker/richer than the main daily screens
+   (EDITS.md round 3): the previous pass tied that darkening to the current
+   moment globally, which made Today/Fast/Analysis/About me too dark
+   whenever it was actually night, a regression. This scopes it to the
+   occasional-visit screens instead (Calendar, Stats, Settings, Mindfulness,
+   the last one in auth.css), independent of moment, main daily screens stay
+   on the standard light tone-base no matter the hour. */
+.calendar-page,
+.stats-page,
+.settings-page {
+  --tone-base: oklch(0.91 0.025 290);
 }

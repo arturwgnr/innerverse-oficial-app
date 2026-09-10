@@ -28,8 +28,9 @@ export async function mergeProfile({ currentProfile, evidence, evidenceType }) {
   });
 }
 
-export function buildOnboardingProfileSeed({ birthDate, responses }) {
+export function buildOnboardingProfileSeed({ preferredName, birthDate, responses }) {
   return {
+    preferred_name: preferredName,
     birth_date: birthDate,
     onboarding_answers: responses,
   };

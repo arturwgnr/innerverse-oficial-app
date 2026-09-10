@@ -5,22 +5,26 @@ import { requireAuth } from "../middleware/requireAuth.js";
 import { embedText } from "../services/voyage.js";
 import { mergeProfile } from "../services/profileMerge.js";
 import { generateEntryAnalysis } from "../services/analysis.js";
+import { describeMood } from "../lib/moods.js";
 
-const FREE_DAILY_ANALYSIS_LIMIT = 3;
+const FREE_DAILY_ANALYSIS_LIMIT = 5;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const router = Router();
 
-const MOODS = ["radiant", "steady", "tender", "restless", "heavy", "numb"];
 const MOMENTS = ["morning", "afternoon", "night", "decompress"];
 
 const entrySchema = z.object({
   moment: z.enum(MOMENTS),
-  mode: z.enum(["full", "fast"]),
+  mode: z.enum(["full", "fast", "mindfulness"]),
   language: z.enum(["en", "pt"]),
   prompt: z.string().optional(),
   textContent: z.string().optional(),
   audioUrl: z.string().optional(),
-  mood: z.enum(MOODS).optional(),
+  mood: z.number().int().min(1).max(6).optional(),
   bullets: z.array(z.string()).optional(),
   occurredAt: z.string().datetime(),
 });
@@ -51,7 +55,7 @@ async function updateMemoryInBackground({ userId, entry }) {
       const currentProfile = rows[0]?.profile || {};
       const profile = await mergeProfile({
         currentProfile,
-        evidence: entry,
+        evidence: { ...entry, mood: describeMood(entry.mood) },
         evidenceType: "entry",
       });
       await pool.query(
@@ -67,17 +71,32 @@ async function updateMemoryInBackground({ userId, entry }) {
 }
 
 // Deep, standalone analysis of this one entry (UPDATES.md: replaces the old
-// cross-entry Patterns feature entirely). Free plan: at most 3 a day, the
-// day boundary is the same simple `now()::date` server date used elsewhere
-// in this codebase for daily caps. Entries past the cap are still saved,
-// they just don't get a deep read that day.
-async function maybeGenerateEntryAnalysis({ userId, entry }) {
+// cross-entry Patterns feature entirely). Free plan: at most 5 a day (one
+// per moment logged plus 2 spare, see UPDATES.md "Analysis quality and
+// reliability"), the day boundary is the same simple `now()::date` server
+// date used elsewhere in this codebase for daily caps. Entries past the cap
+// are still saved, they just don't get a deep read that day.
+export async function maybeGenerateEntryAnalysis({ userId, entry }) {
   // generateEntryAnalysis calls Gemini now, not OpenRouter.
   if (!process.env.GEMINI_API_KEY) {
     await pool.query("update entries set analysis_status = 'skipped' where id = $1", [entry.id]);
     return;
   }
   try {
+    // Claims the entry before doing any real work: flips analysis_status to
+    // 'processing' (not just updated_at) so a concurrent caller (the recovery
+    // sweep in routes/analysis.js, fired on every page reopen, or a manual
+    // retry request) sees a non-'pending' row and backs off, instead of both
+    // firing Gemini and inserting two analyses for the same entry
+    // (UPDATES.md round 3's "analysis regenerating" bug, and round 4 #4's
+    // follow-up: bumping only updated_at still let a second sweep re-claim a
+    // slow, still-pending call once its own staleness window passed).
+    const claim = await pool.query(
+      `update entries set analysis_status = 'processing', updated_at = now() where id = $1 and analysis_status = 'pending' returning id`,
+      [entry.id]
+    );
+    if (claim.rowCount === 0) return;
+
     const { rows: countRows } = await pool.query(
       `select count(*)::int as count from entry_analyses where user_id = $1 and created_at::date = now()::date`,
       [userId]
@@ -110,11 +129,11 @@ async function maybeGenerateEntryAnalysis({ userId, entry }) {
         [userId, entry.id, analysis.title]
       );
       const analysisId = analysisRows[0].id;
-      for (const [position, observation] of analysis.observations.entries()) {
+      for (const [position, paragraph] of analysis.paragraphs.entries()) {
         await client.query(
           `insert into insights (user_id, kind, title, body, entry_id, analysis_id, position)
            values ($1, 'entry_analysis_observation', $2, $3, $4, $5, $6)`,
-          [userId, analysis.title, observation, entry.id, analysisId, position]
+          [userId, analysis.title, paragraph, entry.id, analysisId, position]
         );
       }
       await client.query("update entries set analysis_status = 'ready' where id = $1", [entry.id]);
@@ -162,8 +181,12 @@ router.post("/", requireAuth, async (req, res) => {
   const entry = rows[0];
   res.status(201).json(entry);
 
+  // Staggered on purpose: both calls hit Gemini's free tier, capped at 5
+  // requests/minute (UPDATES.md "Analysis quality and reliability"). Firing
+  // them in the same instant spent 2 of those 5 on a single entry save
+  // alone, this spaces them out instead.
   updateMemoryInBackground({ userId: req.user.id, entry });
-  maybeGenerateEntryAnalysis({ userId: req.user.id, entry });
+  sleep(4000).then(() => maybeGenerateEntryAnalysis({ userId: req.user.id, entry }));
 });
 
 router.get("/", requireAuth, async (req, res) => {

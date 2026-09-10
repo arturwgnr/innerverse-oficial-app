@@ -14,13 +14,13 @@
   flex-direction: column;
 }
 
+/* Centered, with the shared landing-nav-brand glyph treatment (UPDATES.md
+   round 6 #3), the font-size/margin overrides here are the only things this
+   page still needs on top of that shared style. */
 .login-brand {
-  align-self: flex-start;
+  align-self: center;
   margin-bottom: var(--space-6);
-  font-family: var(--font-display);
   font-size: 1.2rem;
-  color: var(--foreground);
-  text-decoration: none;
 }
 
 .login-card {
@@ -86,6 +86,7 @@
   text-decoration: underline;
   text-underline-offset: 4px;
   cursor: pointer;
+  transition: color 0.15s ease;
 }
 
 .login-switch:hover {
@@ -105,6 +106,44 @@
   .login-card {
     padding: var(--space-10);
   }
+}
+
+/* Branded loading/transition screen (UPDATES.md "Loading screen antes de
+   decidir onboarding vs. app"), shown by RouteGuards.jsx while auth/
+   onboarding status is still resolving, same centered nebula/grain card
+   treatment as the login/onboarding pages instead of a generic skeleton. */
+.entering-screen {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.entering-card {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.entering-oracle {
+  margin-bottom: var(--space-6);
+}
+
+.entering-card h1 {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.entering-note {
+  margin-top: var(--space-3);
+  color: var(--muted-foreground);
+}
+
+.entering-retry {
+  margin-top: var(--space-6);
 }
 
 /* Onboarding, matches /references/dashboard's onboarding.tsx: a progress
@@ -172,6 +211,7 @@
   cursor: pointer;
   padding: var(--space-1);
   line-height: 1;
+  transition: color 0.15s ease;
 }
 
 .onboarding-back:hover:not(:disabled) {
@@ -201,15 +241,25 @@
   width: 100%;
   padding: var(--space-4) var(--space-5);
   text-align: left;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
   color: var(--foreground);
   font-size: 0.95rem;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
 
+/* Previously just a barely-visible 1px lift, easy to miss with no colour or
+   border change alongside it (EDITS.md round 3: "no feedback state"). Adds
+   an actual border/background tint on top of the lift. */
 .onboarding-option:hover {
-  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--surface-border));
+  background: color-mix(in oklab, var(--primary) 6%, var(--surface));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .onboarding-option:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .onboarding-option:active {
@@ -260,6 +310,7 @@
   font-size: 0.75rem;
   color: var(--muted-foreground);
   cursor: pointer;
+  transition: color 0.15s ease;
 }
 
 .onboarding-skip:hover {
@@ -300,6 +351,10 @@
 
 /* Mindfulness: a full, distraction-free screen (outside AppShell, no bottom
    nav), same visual language as onboarding. */
+/* Same "menu" darker treatment as Calendar/Stats/Settings, see app-pages.css
+   (EDITS.md round 3): overrides the [data-moment="decompress"] tone-base
+   set on this same element, source order (this file loads after
+   tokens.css) settles the equal-specificity tie. */
 .mindfulness-page {
   min-height: 100dvh;
   display: flex;
@@ -307,6 +362,7 @@
   justify-content: center;
   padding: var(--space-6);
   position: relative;
+  --tone-base: oklch(0.91 0.025 290);
 }
 
 .mindfulness-back {
@@ -358,6 +414,27 @@
   margin-top: var(--space-8);
   display: flex;
   gap: var(--space-3);
+}
+
+/* Optional post-session reflection (EDITS.md round 2 #3). */
+.mindfulness-reflection {
+  width: 100%;
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  resize: vertical;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  color: var(--foreground);
+}
+
+.mindfulness-save-reflection {
+  margin-top: var(--space-3);
+  width: 100%;
+}
+
+.mindfulness-reflection-saved {
+  margin-top: var(--space-6);
 }
 
 @media (min-width: 860px) {

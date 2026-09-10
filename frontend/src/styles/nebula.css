@@ -1,9 +1,13 @@
 /* Cosmos seen in daylight: soft moving light over a warm, light base, never a
    dark starfield. Reimplemented in plain CSS, no Tailwind (JOURNAL.md sec. 10).
-   Mirrors the technique validated in /reference (radial gradients at strong
-   mix percentages, blurred, drifting slowly), recalibrated so it actually
-   reads on screen instead of washing out to a flat tint. */
-
+   Rebalanced (UPDATES.md "Repaginação de paleta, nível Apple, sem perder
+   riqueza"): the previous 52-85% mix percentages were strong enough that
+   four blobs overlapping (plus each [data-moment] variant spreading its
+   three tones across a wide hue range, see tokens.css) read as competing
+   "blobs" rather than one coherent wash. Cut roughly in half here; richness
+   now comes from the narrower per-moment hue families in tokens.css and the
+   grain texture layer (grain.css) doing more of the "premium" work, not from
+   raw saturation. */
 .nebula {
   position: relative;
   isolation: isolate;
@@ -16,13 +20,65 @@
   position: absolute;
   inset: -15%;
   z-index: -1;
-  background-image: radial-gradient(60% 42% at 18% 8%, color-mix(in oklab, var(--tone-1) 88%, transparent), transparent 70%),
-    radial-gradient(55% 40% at 88% 14%, color-mix(in oklab, var(--tone-3) 82%, transparent), transparent 72%),
-    radial-gradient(60% 45% at 78% 82%, color-mix(in oklab, var(--tone-2) 85%, transparent), transparent 74%),
-    radial-gradient(50% 38% at 12% 88%, color-mix(in oklab, var(--tone-1) 70%, transparent), transparent 68%);
+  background-image:
+    radial-gradient(
+      60% 42% at 18% 8%,
+      color-mix(in oklab, var(--tone-1) 32%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      55% 40% at 88% 14%,
+      color-mix(in oklab, var(--tone-3) 38%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      60% 45% at 78% 82%,
+      color-mix(in oklab, var(--tone-2) 40%, transparent),
+      transparent 74%
+    ),
+    radial-gradient(
+      50% 38% at 12% 88%,
+      color-mix(in oklab, var(--tone-1) 26%, transparent),
+      transparent 68%
+    );
   filter: blur(36px);
   animation: nebula-drift 42s ease-in-out infinite alternate;
   will-change: transform;
+}
+
+/* Second differentiation layer beyond hue/saturation (UPDATES.md item 3):
+   blur amount and drift speed vary per moment too, independent of color, so
+   morning/afternoon/night/decompress still feel distinct from each other
+   even where their tone families are close in richness. Hazier + slower for
+   the calmer daylight moments, crisper + livelier for decompress, night
+   sits between the two (hazy like a still night, but slow like real dark).
+   Two selector forms each: `data-moment` and `.nebula` land on the *same*
+   element almost everywhere (.app-shell, .login-page, .oracle-section...),
+   but landing.css's `.oracle-stage.nebula` is a true descendant of the
+   `[data-moment="decompress"]` section around it, a plain descendant
+   combinator alone would miss the same-element case entirely. */
+[data-moment="morning"].nebula::before,
+[data-moment="morning"] .nebula::before {
+  filter: blur(40px);
+  animation-duration: 46s;
+}
+
+[data-moment="afternoon"].nebula::before,
+[data-moment="afternoon"] .nebula::before {
+  filter: blur(30px);
+  animation-duration: 38s;
+}
+
+[data-moment="night"].nebula::before,
+[data-moment="night"] .nebula::before {
+  filter: blur(42px);
+  animation-duration: 50s;
+}
+
+[data-moment="decompress"].nebula::before,
+[data-moment="decompress"] .nebula::before {
+  filter: blur(30px);
+  animation-duration: 28s;
 }
 
 @keyframes nebula-drift {

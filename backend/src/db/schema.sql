@@ -13,12 +13,12 @@ create table if not exists entries (
   id uuid primary key default gen_random_uuid(),
   user_id text not null references "user"(id) on delete cascade,
   moment text not null check (moment in ('morning', 'afternoon', 'night', 'decompress')),
-  mode text not null check (mode in ('full', 'fast')),
+  mode text not null check (mode in ('full', 'fast', 'mindfulness')),
   language text not null check (language in ('en', 'pt')),
   prompt text,
   text_content text,
   audio_url text,
-  mood text check (mood in ('radiant', 'steady', 'tender', 'restless', 'heavy', 'numb')),
+  mood smallint check (mood between 1 and 6),
   bullets jsonb,
   is_retroactive boolean not null default false,
   occurred_at timestamptz not null,
@@ -31,6 +31,16 @@ create table if not exists entries (
 create index if not exists entries_user_occurred_idx on entries (user_id, occurred_at desc);
 create index if not exists entries_user_moment_idx on entries (user_id, moment);
 
+-- Idempotent widen for an existing table (EDITS.md round 2 #3): 'mindfulness'
+-- added as its own mode, a post-meditation reflection is distinct from a
+-- regular full entry, the AI needs to know that's what it's reading.
+do $$
+begin
+  alter table entries drop constraint if exists entries_mode_check;
+  alter table entries add constraint entries_mode_check
+    check (mode in ('full', 'fast', 'mindfulness'));
+end $$;
+
 -- Lets the Analysis page tell "still working on it" and "the model failed"
 -- apart from "never attempted" instead of showing the same empty state for
 -- all three (UPDATES.md #5). 'skipped' covers the two non-failure reasons
@@ -38,6 +48,21 @@ create index if not exists entries_user_moment_idx on entries (user_id, moment);
 -- daily free analysis cap was already reached for that entry.
 alter table entries add column if not exists analysis_status text not null default 'pending'
   check (analysis_status in ('pending', 'ready', 'skipped', 'failed'));
+
+-- 'processing' added (UPDATES.md round 4 #4, duplicate-analysis bug fix): the
+-- background job used to only bump updated_at while claiming an entry,
+-- leaving analysis_status itself at 'pending' for the whole Gemini call. A
+-- slow call (rate-limit retry) could still be 'pending' past the recovery
+-- sweep's 2 minute staleness window, so the sweep would "reclaim" and
+-- generate a second analysis for the same entry. Claiming now flips status
+-- to 'processing' immediately, so a second claim attempt sees a non-pending
+-- row and backs off instead of racing the first one.
+do $$
+begin
+  alter table entries drop constraint if exists entries_analysis_status_check;
+  alter table entries add constraint entries_analysis_status_check
+    check (analysis_status in ('pending', 'processing', 'ready', 'skipped', 'failed'));
+end $$;
 
 -- One time backfill for rows that predate this column: without it, every
 -- pre-existing entry defaults to 'pending' and would show as "still
@@ -54,6 +79,40 @@ update entries e set analysis_status = 'skipped'
   where e.analysis_status = 'pending'
     and e.created_at < now() - interval '10 minutes'
     and not exists (select 1 from entry_analyses ea where ea.entry_id = e.id);
+
+-- Mood taxonomy (UPDATES.md round 3 #2): moved from six unordered poetic
+-- labels (radiant/steady/tender/restless/heavy/numb, deliberately no order)
+-- to an ordered 1-6 thermostatic scale (1 worst, 6 best). Weather-register
+-- display labels (Storming/Overcast/Clouded/Clearing/Bright/Radiant) live in
+-- the frontend locale files, not here, this column is just the ordered
+-- integer. One-time data migration for existing rows below, a judgment-call
+-- mapping from the old set onto the new ordered scale: heavy (Down) -> 1,
+-- tender (Hurt) -> 2, numb (Distant) -> 3, restless (Tense) -> 4, steady
+-- (Calm) -> 5, radiant (Energized) -> 6 (kept as the top anchor, the one
+-- name both taxonomies use for "the best it gets").
+-- Dropped before the type change, not after: the old constraint stays
+-- attached to the column mid-ALTER otherwise, and Postgres re-validates it
+-- against the already-converted smallint values ("operator does not exist:
+-- smallint = text"), even for a USING clause that never references it.
+alter table entries drop constraint if exists entries_mood_check;
+
+do $$
+begin
+  if (select data_type from information_schema.columns where table_name = 'entries' and column_name = 'mood') = 'text' then
+    alter table entries alter column mood type smallint using (
+      case mood
+        when 'heavy' then 1
+        when 'tender' then 2
+        when 'numb' then 3
+        when 'restless' then 4
+        when 'steady' then 5
+        when 'radiant' then 6
+      end
+    );
+  end if;
+end $$;
+
+alter table entries add constraint entries_mood_check check (mood is null or mood between 1 and 6);
 
 -- Living profile: lean structured JSON (~2 to 3k tokens), merged incrementally per entry.
 create table if not exists living_profiles (
@@ -156,6 +215,15 @@ create table if not exists onboarding_responses (
   completed_at timestamptz not null default now()
 );
 
+-- Preferred name/nickname (UPDATES.md round 3 #2, founder-requested exception
+-- to the "no new onboarding questions beyond the prototype" rule, see
+-- CLAUDE.md). Used throughout the app for a more personal feel (greetings,
+-- Oracle copy), mandatory like birth_date rather than left to degrade to a
+-- generic fallback everywhere it's used.
+alter table onboarding_responses add column if not exists preferred_name text;
+update onboarding_responses set preferred_name = 'there' where preferred_name is null;
+alter table onboarding_responses alter column preferred_name set not null;
+
 -- Structural question changes always go through explicit user approval, never silently.
 create table if not exists question_proposals (
   id uuid primary key default gen_random_uuid(),
@@ -185,7 +253,42 @@ create table if not exists question_sets (
 create table if not exists day_mood_overrides (
   user_id text not null references "user"(id) on delete cascade,
   day date not null,
-  mood text not null check (mood in ('radiant', 'steady', 'tender', 'restless', 'heavy', 'numb')),
+  mood smallint not null check (mood between 1 and 6),
   updated_at timestamptz not null default now(),
   primary key (user_id, day)
+);
+
+-- Same 1-6 mood taxonomy migration as entries.mood above, same mapping and
+-- same "drop the old constraint before the type change" ordering.
+alter table day_mood_overrides drop constraint if exists day_mood_overrides_mood_check;
+
+do $$
+begin
+  if (select data_type from information_schema.columns where table_name = 'day_mood_overrides' and column_name = 'mood') = 'text' then
+    alter table day_mood_overrides alter column mood type smallint using (
+      case mood
+        when 'heavy' then 1
+        when 'tender' then 2
+        when 'numb' then 3
+        when 'restless' then 4
+        when 'steady' then 5
+        when 'radiant' then 6
+      end
+    );
+  end if;
+end $$;
+
+alter table day_mood_overrides add constraint day_mood_overrides_mood_check check (mood between 1 and 6);
+
+-- Fast mode's reason picker (UPDATES.md round 3 #5): replaces the free-text
+-- "quick notes" field with selectable keywords for what contributed to the
+-- mood. The small default set (~4, kept generic) lives in the frontend/
+-- locale files, not here, this table only holds what a user has added
+-- themselves, so it persists for reuse on every future fast-mode entry.
+create table if not exists reason_keywords (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null references "user"(id) on delete cascade,
+  label text not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, label)
 );

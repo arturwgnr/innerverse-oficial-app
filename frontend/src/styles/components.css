@@ -8,7 +8,16 @@
   border-radius: var(--radius-full);
   padding: var(--space-3) var(--space-6);
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  /* background/border-color added (UPDATES.md round 6 #4's hover-polish
+     pass): button-ghost's hover background and button-secondary's hover
+     border-color were changing outside this shared transition list, so
+     they snapped instead of easing. */
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -16,20 +25,28 @@
   gap: var(--space-2);
 }
 
+/* Shadows tied to --primary via relative-color syntax (UPDATES.md
+   "Repaginação de paleta" item 4), rather than a duplicated hardcoded
+   literal that would silently drift out of sync if --primary ever changes. */
 .button-primary {
   background: var(--primary);
   color: var(--primary-foreground);
-  box-shadow: 0 8px 24px oklch(0.44 0.12 292 / 0.35);
+  box-shadow: 0 8px 24px oklch(from var(--primary) l c h / 0.35);
 }
 
 .button-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 28px oklch(0.44 0.12 292 / 0.42);
+  box-shadow: 0 10px 28px oklch(from var(--primary) l c h / 0.42);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button-primary:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .button-primary:active {
   transform: translateY(0) scale(0.98);
-  box-shadow: 0 4px 16px oklch(0.44 0.12 292 / 0.35);
+  box-shadow: 0 4px 16px oklch(from var(--primary) l c h / 0.35);
 }
 
 .button-primary:disabled {
@@ -46,7 +63,12 @@
 
 .button-secondary:hover {
   border-color: color-mix(in oklab, var(--primary) 40%, var(--surface-border));
-  transform: translateY(-1px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button-secondary:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .button-secondary:active {
@@ -108,8 +130,11 @@ textarea:focus {
   outline-offset: 1px;
 }
 
+/* Tied to --destructive (UPDATES.md "Repaginação de paleta" item 4: no loose
+   decorative color), this used to be a hand-picked red that duplicated the
+   token's role without referencing it. */
 .form-error {
-  color: oklch(0.5 0.18 25);
+  color: var(--destructive);
 }
 
 .form-success {
@@ -140,7 +165,11 @@ textarea:focus {
   border-radius: var(--radius-full);
   filter: blur(20px);
   opacity: 0.7;
-  background: radial-gradient(circle, color-mix(in oklab, var(--violet) 55%, transparent), transparent 70%);
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--violet) 55%, transparent),
+    transparent 70%
+  );
 }
 
 .oracle {
@@ -148,7 +177,10 @@ textarea:focus {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 10px 22px color-mix(in oklab, var(--tone-1) 45%, oklch(0.44 0.12 292 / 0.3)));
+  filter: drop-shadow(
+    0 10px 22px
+      color-mix(in oklab, var(--tone-1) 45%, oklch(from var(--primary) l c h / 0.3))
+  );
 }
 
 .oracle-float {
@@ -208,6 +240,28 @@ textarea:focus {
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-5);
+  /* Explicit height, not left to each slide's own text length (EDITS.md
+     round 3: instances were rendering at inconsistent sizes as the carousel
+     cycled through phrases of different lengths). */
+  min-height: 92px;
+  box-sizing: border-box;
+  /* .glass's shadow was rendering clipped/broken here (EDITS.md round 2 #3),
+     the Carousel track's overflow:hidden cuts it off on one side instead of
+     showing it whole. Simplest fix: this card just doesn't cast one. */
+  box-shadow: none;
+}
+
+/* Mascot's own background shadow removed here (EDITS.md round 5): the
+   violet glow halo and the image's drop-shadow both read as a muddy blob
+   behind the small 44px mascot crowded into this tight speech-bubble row.
+   Left alone everywhere else (onboarding hero, About me), this is scoped to
+   oracle-speech specifically. */
+.oracle-speech .oracle-glow {
+  display: none;
+}
+
+.oracle-speech .oracle {
+  filter: none;
 }
 
 .oracle-speech p {
@@ -234,8 +288,10 @@ textarea:focus {
   transition: transform 0.15s ease;
 }
 
-.mindfulness-card:hover {
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .mindfulness-card:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .mindfulness-card-cta {
@@ -260,27 +316,108 @@ textarea:focus {
   pointer-events: none;
 }
 
+/* Transition-based, not a @keyframes animation (emil-design-eng, the Sonner
+   principles: toasts get added in quick succession, keyframes restart from
+   zero on interruption, transitions retarget smoothly). @starting-style
+   handles the entrance without a mount-flag dance; [data-leaving] handles
+   the exit, which this never had before, dismissal just spliced the toast
+   out instantly. Exit is snappier than enter on purpose (system responding
+   vs. something the user is meant to actually read). */
 .toast {
   pointer-events: auto;
   width: 100%;
-  padding: var(--space-3) var(--space-5);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  text-align: left;
   font-size: 0.85rem;
   color: var(--foreground);
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 220ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.95);
+  }
+}
+
+.toast[data-leaving] {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.toast-message {
+  flex: 1;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.toast-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+}
+
+.toast-dismiss {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--muted-foreground);
   cursor: pointer;
-  animation: toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.toast-dismiss:hover {
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  color: var(--foreground);
 }
 
 .toast-error {
-  box-shadow: var(--shadow-soft), 0 0 0 1px color-mix(in oklab, var(--destructive) 45%, transparent);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 1px color-mix(in oklab, var(--destructive) 30%, transparent);
+}
+
+.toast-error .toast-icon {
   color: var(--destructive);
+  background: color-mix(in oklab, var(--destructive) 14%, transparent);
 }
 
 .toast-success {
-  box-shadow: var(--shadow-soft), 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 1px color-mix(in oklab, var(--primary) 22%, transparent);
 }
 
-@keyframes toast-in {
+.toast-success .toast-icon {
+  color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+}
+
+/* Still used by .mirror-demo-response (landing.css): a one-time reveal, not
+   a rapidly-added/removed element like a toast, so a keyframe here is fine,
+   nothing to interrupt or retarget. */
+@keyframes reveal-in {
   from {
     opacity: 0;
     transform: translateY(-12px);
@@ -289,6 +426,48 @@ textarea:focus {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Skeleton shimmer, app-wide rule (UPDATES.md round 3 #2): whenever content
+   isn't ready yet, show a placeholder shaped like the real thing with a
+   gradient sweeping across it, never a blank gap, opaque overlay, or a bare
+   spinner. Each page composes .skeleton blocks into its own real layout
+   (see components/Skeleton.jsx) rather than one generic centered spinner. */
+.skeleton {
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    100deg,
+    var(--muted) 22%,
+    var(--popover) 50%,
+    var(--muted) 78%
+  );
+  background-size: 250% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -150% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--muted);
+  }
+}
+
+.skeleton-text {
+  height: 0.85em;
+  margin: 0.35em 0;
+}
+
+.skeleton-circle {
+  border-radius: var(--radius-full);
 }
 
 /* Carousel: swipeable/draggable, auto-advancing */
@@ -329,7 +508,9 @@ textarea:focus {
   border-radius: var(--radius-full);
   background: var(--input);
   cursor: pointer;
-  transition: background 0.2s ease, width 0.2s ease;
+  transition:
+    background 0.2s ease,
+    width 0.2s ease;
 }
 
 .carousel-dot.active {
@@ -354,9 +535,6 @@ textarea:focus {
 }
 
 .language-toggle button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
   background: transparent;
   border: none;
   border-radius: var(--radius-full);
@@ -366,12 +544,10 @@ textarea:focus {
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--muted-foreground);
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.language-flag {
-  font-size: 0.9rem;
-  line-height: 1;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .language-toggle button:hover:not(.active) {
@@ -384,7 +560,7 @@ textarea:focus {
   box-shadow: var(--shadow-soft);
 }
 
-/* App shell (Today/Calendar/Fast/Patterns/About me), matches
+/* App shell (Today/Calendar/Fast/Analysis/About me), matches
    /references/dashboard's app-shell.tsx: one narrow column, centered
    regardless of viewport width (this app reads like a phone-shaped
    experience even on desktop), a floating pill tab bar instead of a
@@ -392,6 +568,43 @@ textarea:focus {
 .app-shell {
   min-height: 100dvh;
   width: 100%;
+}
+
+/* Gentler ambient wash than the shared .nebula default (EDITS.md round 3:
+   "dashboard background too strong", too saturated for the screen used all
+   day). Two classes, beats the plain .nebula::before rule (nebula.css) on
+   specificity regardless of import order. Deliberately scoped to
+   .app-shell only, Calendar/Stats/Settings/Mindfulness stay as intense as
+   they already are, per the same round's explicit "don't touch those" call:
+   their own darker feel comes from their scoped --tone-base override on the
+   page itself (see the "Fundo mais escuro só nas telas de menu" note in
+   CLAUDE.md), not from this ambient wash, so toning this down doesn't
+   change how they read. */
+/* Rebalanced alongside the shared .nebula::before (UPDATES.md "Repaginação de
+   paleta"): the calmest of all the scoped variants on purpose, this is the
+   backdrop behind the screens seen the most (Today/Fast/Analysis/About me). */
+.app-shell.nebula::before {
+  background-image:
+    radial-gradient(
+      60% 42% at 18% 8%,
+      color-mix(in oklab, var(--tone-1) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      55% 40% at 88% 14%,
+      color-mix(in oklab, var(--tone-3) 26%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      60% 45% at 78% 82%,
+      color-mix(in oklab, var(--tone-2) 28%, transparent),
+      transparent 74%
+    ),
+    radial-gradient(
+      50% 38% at 12% 88%,
+      color-mix(in oklab, var(--tone-1) 18%, transparent),
+      transparent 68%
+    );
 }
 
 .app-shell-inner {
@@ -410,25 +623,258 @@ textarea:focus {
   flex-direction: column;
 }
 
-.app-utility-row {
+/* Same "tiny lost island on a big screen" issue already fixed on
+   login/onboarding/mindfulness (see auth.css), just never carried over to
+   the main app shell (UPDATES.md #7): a 430px column left the rest of a
+   desktop viewport as bare empty space instead of reading like a full
+   product. Widens the column and scales up the content padding/type to
+   match, the floating nav pill (sized off the viewport, not this column)
+   needs no change. */
+@media (min-width: 860px) {
+  .app-shell-inner {
+    max-width: 760px;
+  }
+
+  .app-content {
+    padding: var(--space-8) var(--space-8) var(--space-6);
+  }
+}
+
+@media (min-width: 1200px) {
+  .app-shell-inner {
+    max-width: 900px;
+  }
+}
+
+/* Top bar (EDITS.md round 2 #1's nav overhaul): a hamburger opening Calendar,
+   Stats and Settings, the less-frequent items pulled out of the bottom nav
+   per Hick's Law. Always a glass surface, this is a short app screen, not a
+   long marketing scroll, no need for a scroll-triggered reveal like the
+   landing page's own top bar. Edge-to-edge across .app-shell-inner's own
+   width (EDITS.md round 5: this was still a rounded, inset pill with
+   margin on both sides despite being asked for before, the fix landed on
+   the landing page's nav instead of this element by mistake). Square
+   corners, no horizontal margin, the background itself now reaches both
+   edges of the app's column, padding moved inside so the content still
+   sits inset from them. */
+.app-topbar {
+  /* Edge-to-edge across the actual viewport (UPDATES.md round 4 #6), not
+     just .app-shell-inner's own centered max-width column: 100vw plus a
+     compensating negative margin breaks it out of that column without
+     touching .app-shell-inner's width or .app-content's layout at all. A
+     duplicate `width: 100%; margin: 0;` further down used to immediately
+     cancel this back down to the column's own width, that's the bug, this
+     is the fix, no other rule below changed. */
+  width: 100vw;
+  margin-left: calc((100% - 100vw) / 2);
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5) 0;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: 0;
 }
 
-.app-utility-signout {
-  background: none;
+/* Real SVG icon (UPDATES.md round 4 #6), replacing the old hand-rolled
+   3-<span> bars, same treatment as the topbar/sidebar's sign-out icon. */
+.app-hamburger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border: none;
-  color: var(--muted-foreground);
-  font-size: 0.75rem;
+  background: transparent;
+  color: var(--foreground);
   cursor: pointer;
-  padding: var(--space-1) 0;
+  padding: 0;
 }
 
-.app-utility-signout:hover {
+.app-topbar-brand {
+  font-family: var(--font-display);
+  font-size: 1rem;
   color: var(--foreground);
+}
+
+/* Same sign-out action as the sidebar footer, also reachable straight from
+   the top bar without opening the menu (EDITS.md round 5). Pushed to the
+   far right via margin-left: auto since it's the last flex child after the
+   brand. */
+.app-topbar-signout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-topbar-signout:hover {
+    color: var(--foreground);
+    background: var(--muted);
+  }
+}
+
+.app-topbar-signout:active {
+  transform: scale(0.94);
+}
+
+/* Real off-canvas sidebar (EDITS.md round 3: a centered modal card read as
+   a dropdown, not a proper sidebar), slides in from the left edge and takes
+   the full viewport height instead of floating as a small panel. */
+.app-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: oklch(from var(--foreground) l c h / 0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease-out);
+}
+
+.app-sidebar-backdrop.open {
+  width: fit-content !important;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Solid background, not .glass (EDITS.md round 3: the translucent
+   backdrop-blur was letting the page behind bleed through unevenly right at
+   the panel's own edge, reading as a gap/seam rather than a clean border).
+   Square corners, edge to edge on its own bounds, 50% of the viewport
+   width, per the round 3 spec. */
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 41;
+  /* Narrower panel (UPDATES.md round 4 #5): half the screen read as too much
+     real estate for a 4-item list, this is closer to the width the content
+     itself actually needs. */
+  width: 40vw;
+  min-width: 220px;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+  border-radius: 0;
+  background: var(--popover);
+  border-right: 1px solid var(--border);
+  box-shadow: var(--shadow-lift);
+  transform: translateX(-100%);
+  transition: transform 0.35s var(--ease-out);
+  will-change: transform;
+}
+
+.app-sidebar.open {
+  transform: translateX(0);
+}
+
+.app-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.app-sidebar-head .modal-close {
+  position: static;
+}
+
+/* Sign out at the bottom (EDITS.md round 5: round 3's note to move it to
+   the top was a mistake, reverted). Pinned to the end of the sidebar's flex
+   column via margin-top: auto, not just a fixed gap under the links, so it
+   reads as a persistent footer action regardless of how many links sit
+   above it. Styled as its own quiet row rather than a link. */
+.app-sidebar-signout {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--surface-border);
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: color 0.15s ease;
+}
+
+.app-sidebar-signout:hover {
+  color: var(--foreground);
+}
+
+.app-sidebar-signout-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* Tighter list, icons alongside labels, a filled active state (EDITS.md
+   round 3, adapted from the Flowee reference to Innerverse's own surface/
+   mood tokens rather than copied literally). */
+.app-sidebar-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.app-sidebar-links a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+  font-family: var(--font-ui);
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.app-sidebar-links a:hover {
+  background: color-mix(in oklab, var(--primary) 6%, transparent);
+  color: var(--foreground);
+}
+
+.app-sidebar-links a.active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 500;
+}
+
+.app-sidebar-link-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  font-size: 1rem;
 }
 
 .app-content {
@@ -492,7 +938,28 @@ textarea:focus {
   letter-spacing: 0.02em;
   padding: var(--space-2) 0;
   border-radius: var(--radius-lg);
-  transition: color 0.15s ease;
+  /* 0.4s ease (EDITS.md round 5): the previous 160ms was reading as an
+     abrupt snap rather than a real transition. */
+  transition:
+    color 0.4s ease,
+    transform 0.4s ease;
+}
+
+/* Real motion feedback, not just a colour swap (EDITS.md round 3: bottom
+   bar items were static). Gated behind hover:hover so it doesn't leave a
+   "stuck" lifted state on tap-only devices. */
+@media (hover: hover) and (pointer: fine) {
+  .bottom-nav-item a:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.bottom-nav-item a:active {
+  transform: scale(0.95);
+  /* Press feedback stays snappy even though hover above is now slower
+     (0.4s): a tap acknowledgement should feel instant, only the hover
+     lift needed the smoother ease. */
+  transition-duration: 120ms;
 }
 
 .bottom-nav-glyph {
@@ -502,7 +969,9 @@ textarea:focus {
   height: 32px;
   border-radius: var(--radius-full);
   font-size: 1rem;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .bottom-nav-item a.active {
@@ -513,6 +982,49 @@ textarea:focus {
   background: var(--accent);
   color: var(--accent-foreground);
   box-shadow: var(--shadow-soft);
+}
+
+/* Center "quick add" shortcut (EDITS.md round 2 #1): visually distinct from
+   the four plain nav items on purpose, an elevated solid circle rather than
+   a fifth identical tab, so it reads as the one-tap action it is. */
+.bottom-nav-item-add {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+}
+
+/* No offset transform (EDITS.md round 5: the previous "float above the bar"
+   translateY hack was only reading as centered while :hover's slightly
+   different offset was active, base state was off). Sits centered the same
+   way the other four items do, via the row's own align-items:center,
+   staying visually distinct through its size and solid fill alone, no
+   position gimmick needed. Hover removed entirely per this round's ask,
+   :active still gives a press a real press still feels acknowledged. */
+.bottom-nav-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: 0 8px 20px oklch(from var(--primary) l c h / 0.4);
+  transition: transform 160ms var(--ease-out);
+}
+
+/* Two classes, beats the generic ".bottom-nav-item a" colour rule (one
+   class + element, EDITS.md round 3: the "+" was rendering muted grey
+   instead of white because that rule was winning on specificity). */
+.bottom-nav-item-add .bottom-nav-add {
+  color: var(--primary-foreground);
+}
+
+.bottom-nav-add:active {
+  transform: scale(0.94);
 }
 
 .screen-title {
@@ -542,10 +1054,13 @@ textarea:focus {
   font-style: italic;
 }
 
-/* Mood chips, shared by Fast, Today's optional tag, and Calendar legend */
+/* Mood chips, shared by Fast, Today's optional tag, and Calendar legend.
+   Centered (UPDATES.md round 4 #3), the row used to hug the left edge
+   instead of reading as one deliberate group under the textarea. */
 .mood-picker {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-2);
   margin-bottom: var(--space-4);
 }
@@ -559,82 +1074,105 @@ textarea:focus {
   color: var(--foreground);
   background: var(--surface);
   box-shadow: var(--shadow-soft);
-  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.mood-chip:hover {
-  transform: translateY(-1px);
+/* More modern hover motion (UPDATES.md round 4 #3): a touch of lift plus a
+   subtle scale, not just the old flat 1px nudge, so picking a mood feels
+   like a responsive object instead of a static label. */
+@media (hover: hover) and (pointer: fine) {
+  .mood-chip:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: var(--shadow-lift, var(--shadow-soft));
+  }
 }
 
 .mood-chip:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 /* Tinted wash by default (a hint of the mood's colour, not the full solid
-   fill), a confident full-colour fill plus a matching glow once selected. */
-.mood-chip.mood-radiant {
-  background: color-mix(in oklab, var(--mood-radiant) 30%, var(--surface));
+   fill), a confident full-colour fill plus a matching glow once selected.
+   Six mood classes keyed by position (1-6, UPDATES.md round 3 #2's ordered
+   scale) instead of the old poetic names. */
+.mood-chip.mood-1 {
+  background: color-mix(in oklab, var(--mood-1) 30%, var(--surface));
 }
-.mood-chip.mood-steady {
-  background: color-mix(in oklab, var(--mood-steady) 30%, var(--surface));
+.mood-chip.mood-2 {
+  background: color-mix(in oklab, var(--mood-2) 30%, var(--surface));
 }
-.mood-chip.mood-tender {
-  background: color-mix(in oklab, var(--mood-tender) 30%, var(--surface));
+.mood-chip.mood-3 {
+  background: color-mix(in oklab, var(--mood-3) 30%, var(--surface));
 }
-.mood-chip.mood-restless {
-  background: color-mix(in oklab, var(--mood-restless) 30%, var(--surface));
+.mood-chip.mood-4 {
+  background: color-mix(in oklab, var(--mood-4) 30%, var(--surface));
 }
-.mood-chip.mood-heavy {
-  background: color-mix(in oklab, var(--mood-heavy) 30%, var(--surface));
+.mood-chip.mood-5 {
+  background: color-mix(in oklab, var(--mood-5) 30%, var(--surface));
 }
-.mood-chip.mood-numb {
-  background: color-mix(in oklab, var(--mood-numb) 30%, var(--surface));
+.mood-chip.mood-6 {
+  background: color-mix(in oklab, var(--mood-6) 30%, var(--surface));
 }
 
-.mood-chip.mood-radiant.active {
-  background: var(--mood-radiant);
-  box-shadow: var(--shadow-soft), 0 0 0 2px color-mix(in oklab, var(--mood-radiant) 70%, var(--foreground));
+.mood-chip.mood-1.active {
+  background: var(--mood-1);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-1) 70%, var(--foreground));
 }
-.mood-chip.mood-steady.active {
-  background: var(--mood-steady);
-  box-shadow: var(--shadow-soft), 0 0 0 2px color-mix(in oklab, var(--mood-steady) 70%, var(--foreground));
+.mood-chip.mood-2.active {
+  background: var(--mood-2);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-2) 70%, var(--foreground));
 }
-.mood-chip.mood-tender.active {
-  background: var(--mood-tender);
-  box-shadow: var(--shadow-soft), 0 0 0 2px color-mix(in oklab, var(--mood-tender) 70%, var(--foreground));
+.mood-chip.mood-3.active {
+  background: var(--mood-3);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-3) 70%, var(--foreground));
 }
-.mood-chip.mood-restless.active {
-  background: var(--mood-restless);
-  box-shadow: var(--shadow-soft), 0 0 0 2px color-mix(in oklab, var(--mood-restless) 70%, var(--foreground));
+.mood-chip.mood-4.active {
+  background: var(--mood-4);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-4) 70%, var(--foreground));
 }
-.mood-chip.mood-heavy.active {
-  background: var(--mood-heavy);
-  box-shadow: var(--shadow-soft), 0 0 0 2px color-mix(in oklab, var(--mood-heavy) 70%, var(--foreground));
+.mood-chip.mood-5.active {
+  background: var(--mood-5);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-5) 70%, var(--foreground));
 }
-.mood-chip.mood-numb.active {
-  background: var(--mood-numb);
-  box-shadow: var(--shadow-soft), 0 0 0 2px color-mix(in oklab, var(--mood-numb) 70%, var(--foreground));
+.mood-chip.mood-6.active {
+  background: var(--mood-6);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 2px color-mix(in oklab, var(--mood-6) 70%, var(--foreground));
 }
 
 /* Fast mode's glyph circles and the calendar cells still want the full
    solid mood fill (not the chip's tint), keep those as plain classes. */
-.mood-radiant {
-  background: var(--mood-radiant);
+.mood-1 {
+  background: var(--mood-1);
 }
-.mood-steady {
-  background: var(--mood-steady);
+.mood-2 {
+  background: var(--mood-2);
 }
-.mood-tender {
-  background: var(--mood-tender);
+.mood-3 {
+  background: var(--mood-3);
 }
-.mood-restless {
-  background: var(--mood-restless);
+.mood-4 {
+  background: var(--mood-4);
 }
-.mood-heavy {
-  background: var(--mood-heavy);
+.mood-5 {
+  background: var(--mood-5);
 }
-.mood-numb {
-  background: var(--mood-numb);
+.mood-6 {
+  background: var(--mood-6);
 }
 
 .legend-item {
@@ -644,18 +1182,77 @@ textarea:focus {
   margin-right: var(--space-2);
 }
 
-/* Modal */
+/* Modal, centered on screen (UPDATES.md round 3 #4: the Calendar day sheet
+   used to anchor to the bottom edge like a mobile action sheet, off-center
+   and not matching the rest of the site's dialog-shaped surfaces). */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: oklch(0.28 0.028 285 / 0.35);
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  background: oklch(from var(--foreground) l c h / 0.32);
+  backdrop-filter: blur(4px);
+  padding: var(--space-6);
+  opacity: 1;
+  transition: opacity 200ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+  }
 }
 
+/* transform-origin stays default (center): unlike a popover, a modal isn't
+   anchored to a trigger element, it belongs centered in the viewport either
+   way (emil-design-eng). Scale starts at 0.95, not 0, nothing in the real
+   world pops in from nothing. */
 .modal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: 80vh;
+  overflow-y: auto;
   padding: var(--space-8);
-  max-width: 420px;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.modal-close:hover {
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--primary) 40%, var(--surface-border));
+}
+
+.modal-close:active {
+  transform: scale(0.94);
 }

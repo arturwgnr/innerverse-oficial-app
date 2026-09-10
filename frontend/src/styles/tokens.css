@@ -30,21 +30,30 @@
   --rose: oklch(0.79 0.09 20);
   --gold: oklch(0.85 0.1 85);
 
-  /* Mood taxonomy (calendar, fast mode) */
-  --mood-radiant: oklch(0.86 0.11 88);
-  --mood-steady: oklch(0.83 0.08 165);
-  --mood-tender: oklch(0.86 0.07 20);
-  --mood-restless: oklch(0.82 0.09 300);
-  --mood-heavy: oklch(0.74 0.05 260);
-  --mood-numb: oklch(0.86 0.012 90);
+  /* Mood taxonomy (calendar, fast mode): ordered 1-6 scale, low to high
+     (EDITS.md round 2 #1). Colours are a real emotional thermometer now, not
+     a decorative palette (round 2 #1's explicit ask): a muted, not-too-
+     aggressive red at "Overwhelmed" grading directly through orange/amber to
+     green at "Radiant", so the colour itself reads as low->high at a glance.
+     Stays inside the same light range as the rest of the app (never darker
+     than L 0.72), per tokens.css's "always light, cosmos seen in daylight"
+     rule at the top of this file, this is a warmer/cooler hue gradient, not
+     a literal darkening. */
+  --mood-1: oklch(0.72 0.13 25);
+  --mood-2: oklch(0.76 0.11 45);
+  --mood-3: oklch(0.82 0.09 75);
+  --mood-4: oklch(0.85 0.09 125);
+  --mood-5: oklch(0.85 0.11 145);
+  --mood-6: oklch(0.86 0.12 155);
 
   /* Moment of day tone: three accent points feeding the nebula gradient, plus
      a near white base tint that the whole moment leans on (surfaces, cards).
-     Defaults to morning. Overridden per [data-moment] below. */
+     Defaults to morning (kept in sync with [data-moment="morning"] below).
+     Overridden per [data-moment] below. */
   --tone-1: oklch(0.85 0.1 85);
-  --tone-2: oklch(0.79 0.09 20);
-  --tone-3: oklch(0.88 0.08 300);
-  --tone-base: oklch(0.97 0.025 85);
+  --tone-2: oklch(0.82 0.08 60);
+  --tone-3: oklch(0.9 0.05 100);
+  --tone-base: oklch(0.97 0.02 85);
 
   /* Surfaces derive from the active moment tone, never a flat white, this is
      what makes glass cards read as "floating over the nebula" instead of
@@ -56,6 +65,13 @@
   --shadow-glass: var(--shadow-soft);
   --shadow-lift: 0 2px 4px oklch(0.4 0.04 285 / 0.05),
     0 28px 56px -20px color-mix(in oklab, var(--tone-1) 45%, oklch(0.4 0.08 292 / 0.22));
+
+  /* Motion: stronger custom curves, not the built-in CSS easings (too weak
+     to feel intentional, emil-design-eng). ease-out for anything entering or
+     exiting, ease-in-out for on-screen movement. Never ease-in on its own,
+     it delays the initial movement right when it's being watched closest. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   /* Type */
   --font-display: "Fraunces", "Iowan Old Style", serif;
@@ -85,33 +101,64 @@
   --space-16: 64px;
 }
 
-/* Leve diferenciação estética por momento do dia (JOURNAL.md secao 2). Cada
-   momento gira pelo mesmo conjunto de acentos iridescentes num par dominante
-   diferente, nunca escurecendo, sempre dentro do espectro claro. */
+/* Leve diferenciação estética por momento do dia (JOURNAL.md secao 2).
+   Repaginação de paleta (UPDATES.md "Repaginação de paleta, nível Apple, sem
+   perder riqueza"): a causa raiz do efeito "blobs destoantes" era cada
+   momento espalhar tone-1/2/3 por até ~280° na roda cromática (ex.: decompress
+   cruzava violeta+teal+dourado numa tela só). Cada momento agora fica dentro
+   de uma família de matiz única e estreita (span de ~25-40° entre os três
+   tons, nunca mais que isso), como se as três luzes fossem variações de uma
+   mesma fonte, não três fontes coloridas competindo. Riqueza continua vindo
+   de luminosidade/chroma (manhã/tarde mais claras e suaves, noite/decompress
+   mais densas e saturadas), não da largura do leque de matizes. */
 [data-moment="morning"] {
   --tone-1: oklch(0.85 0.1 85);
-  --tone-2: oklch(0.79 0.09 20);
-  --tone-3: oklch(0.88 0.08 300);
-  --tone-base: oklch(0.97 0.025 85);
+  --tone-2: oklch(0.82 0.08 60);
+  --tone-3: oklch(0.9 0.05 100);
+  --tone-base: oklch(0.97 0.02 85);
 }
 
 [data-moment="afternoon"] {
-  --tone-1: oklch(0.76 0.1 190);
-  --tone-2: oklch(0.85 0.1 85);
-  --tone-3: oklch(0.88 0.07 300);
-  --tone-base: oklch(0.97 0.02 190);
+  --tone-1: oklch(0.8 0.08 190);
+  --tone-2: oklch(0.84 0.07 210);
+  --tone-3: oklch(0.9 0.04 170);
+  --tone-base: oklch(0.97 0.015 190);
 }
 
+/* Night (EDITS.md round 2 #3, tone-base reverted in round 3): a distinct
+   deep violet/indigo family instead of reusing morning/afternoon's warm
+   tones, so it still reads as its own moment. tone-3 used to be a rose(20)
+   borrowed from the morning/afternoon set, ~280° away from the violet
+   anchor, the single biggest source of clash in the old palette, replaced
+   here with a magenta-violet neighbor from the same family. Round 2 also
+   dropped tone-base to 0.89 to make the whole app dim on the main daily
+   screens whenever it was actually night, round 3 called that a regression,
+   "app background too dark", reverted here to the same light range every
+   other moment uses. The deliberately darker "menu" treatment (Calendar/
+   Stats/Settings/Mindfulness) is separate now, scoped to those pages
+   directly in app-pages.css, not tied to the current moment at all. */
 [data-moment="night"] {
-  --tone-1: oklch(0.68 0.14 300);
-  --tone-2: oklch(0.79 0.09 20);
-  --tone-3: oklch(0.85 0.06 190);
-  --tone-base: oklch(0.965 0.025 300);
+  --tone-1: oklch(0.6 0.12 295);
+  --tone-2: oklch(0.56 0.09 270);
+  --tone-3: oklch(0.66 0.07 320);
+  --tone-base: oklch(0.965 0.02 300);
 }
 
+/* Decompress (EDITS.md round 2 #3): the other three moments all rotate the
+   same four accent hues (morning/afternoon especially read close together),
+   this one gets its own richer, more saturated identity instead, "cosmos and
+   the Oracle itself" rather than a fourth time-of-day variant, matching the
+   more vivid nebula treatment decompress already gets on the landing page's
+   moment card hover (UPDATES.md round 3 #6.1). Used to span violet+teal+gold
+   (three unrelated hues at once, the richest moment was also the most prone
+   to reading as "blobs"), narrowed to a violet/magenta family, still the
+   most saturated of the four (highest chroma), just no longer three
+   different color stories in one screen. Tone-base reverted in round 3 same
+   as night, see above, and its own hue corrected to match this family
+   (it was 20/rose, orphaned from tone-1/2/3 entirely). */
 [data-moment="decompress"] {
-  --tone-1: oklch(0.79 0.09 20);
-  --tone-2: oklch(0.76 0.1 190);
-  --tone-3: oklch(0.88 0.07 85);
-  --tone-base: oklch(0.97 0.022 20);
+  --tone-1: oklch(0.64 0.14 300);
+  --tone-2: oklch(0.6 0.12 325);
+  --tone-3: oklch(0.72 0.1 275);
+  --tone-base: oklch(0.97 0.02 300);
 }
