@@ -57,6 +57,22 @@ export function AnalysisSkeleton() {
   );
 }
 
+// Mirrors Today.jsx's streak badge (UPDATES.md round 7 follow-up) while
+// GET /api/stats is still in flight, instead of the badge just not being
+// there at all until it resolves.
+export function StreakBadgeSkeleton() {
+  return (
+    <div className="streak-badge glass" aria-busy="true">
+      <div className="streak-badge-top">
+        <Skeleton className="skeleton-circle" style={{ width: 18, height: 18 }} />
+        <Skeleton className="skeleton-text" style={{ width: "1.4rem", height: "1.4rem" }} />
+      </div>
+      <Skeleton className="skeleton-text" style={{ width: "70%", marginTop: "var(--space-1)" }} />
+      <Skeleton className="skeleton-text" style={{ width: "90%" }} />
+    </div>
+  );
+}
+
 // Mirrors Calendar.jsx's month grid (EDITS.md round 2 #5): a shimmering
 // placeholder shaped like the actual 7-column grid instead of a spinner, so
 // mood colours don't just pop in abruptly once the fetch resolves.

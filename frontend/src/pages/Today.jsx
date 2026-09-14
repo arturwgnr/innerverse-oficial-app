@@ -10,6 +10,7 @@ import { enqueueEntry } from "../lib/entryQueue.js";
 import { pickLine } from "../lib/toastCopy.js";
 import { Oracle } from "../components/Oracle.jsx";
 import { Carousel } from "../components/Carousel.jsx";
+import { StreakBadgeSkeleton } from "../components/Skeleton.jsx";
 
 const LOGIN_GREETING_FLAG = "innerverse.justSignedIn";
 
@@ -161,13 +162,18 @@ export function Today() {
 
   // Streak badge (UPDATES.md round 7): reuses /api/stats' already-computed
   // currentStreak (Stats page has its own render of the same number),
-  // rather than re-deriving it from raw entries here.
+  // rather than re-deriving it from raw entries here. Shows a skeleton
+  // while the fetch is in flight (follow-up fix) instead of the badge
+  // simply not being there yet, same "never a blank gap" rule every other
+  // loading state in the app already follows.
   const [streak, setStreak] = useState(null);
+  const [streakLoading, setStreakLoading] = useState(true);
   useEffect(() => {
     api
       .get("/api/stats")
       .then((data) => setStreak(data.currentStreak))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setStreakLoading(false));
   }, []);
 
   const streakMessage = useMemo(() => {
@@ -484,9 +490,11 @@ export function Today() {
         </div>
 
         {/* Streak badge (UPDATES.md round 7), top-right corner, its caption
-            varies by streak size (see streakMessage above). Only rendered
-            once the count has actually loaded, no placeholder flash of "0". */}
-        {streak !== null && (
+            varies by streak size (see streakMessage above). A shimmering
+            skeleton while /api/stats is in flight, nothing at all if it
+            fails (no error state worth surfacing for a nice-to-have badge). */}
+        {streakLoading && <StreakBadgeSkeleton />}
+        {!streakLoading && streak !== null && (
           <div className="streak-badge glass">
             <div className="streak-badge-top">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="streak-badge-flame" aria-hidden="true">
