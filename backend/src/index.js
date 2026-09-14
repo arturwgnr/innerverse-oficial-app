@@ -31,6 +31,8 @@ import reasonsRouter from "./routes/reasons.js";
 import settingsRouter from "./routes/settings.js";
 import statsRouter from "./routes/stats.js";
 import notificationsRouter from "./routes/notifications.js";
+import chronicleRouter from "./routes/chronicle.js";
+import chaptersRouter from "./routes/chapters.js";
 
 const app = express();
 
@@ -61,6 +63,8 @@ app.use("/api/reasons", reasonsRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/stats", statsRouter);
 app.use("/api/notifications", notificationsRouter);
+app.use("/api/chronicle", chronicleRouter);
+app.use("/api/chapters", chaptersRouter);
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use((err, req, res, next) => {

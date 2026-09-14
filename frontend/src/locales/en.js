@@ -57,6 +57,13 @@ export default {
       "Your reading just grew, a fresh page in what I know about you.",
       "Something shifted, this reading is fresher now.",
     ],
+    // Round 7 adicional: subtle nudge when the general chronicle
+    // regenerates, same pattern as aboutMeUpdated above.
+    chronicleUpdated: [
+      "The Oracle updated what it knows about you.",
+      "Your chronicle just grew a little.",
+      "Something in your story just came into sharper focus.",
+    ],
     profileSaved: ["Saved, the Oracle takes note.", "Kept."],
     passwordChanged: ["Changed, and kept quiet from here on."],
     correctionConfirmed: [
@@ -105,6 +112,7 @@ export default {
     settings: "Settings",
     menu: "Menu",
     notifications: "Notifications",
+    chapters: "Chapters",
   },
   // Topbar bell (user request): broadcast "what's new" notifications, same
   // rows for every user, dated so people can see when something shipped.
@@ -237,17 +245,20 @@ export default {
   },
   today: {
     greeting: "Hey {name}.",
-    // Streak badge (UPDATES.md round 7): top-right of the arrival screen,
-    // caption picked from the highest tier the current streak clears.
+    // Streak badge (UPDATES.md round 7, variety added in the follow-up
+    // round): caption picked from the highest tier the current streak
+    // clears, then a random line within that tier (pickLine, same pattern
+    // as the toast copy), so the same streak count doesn't always show the
+    // exact same sentence.
     streakUnit: "day streak",
     streakTiers: [
-      { min: 0, message: "Start your streak today." },
-      { min: 1, message: "Day one. Come back tomorrow." },
-      { min: 2, message: "A rhythm is forming." },
-      { min: 4, message: "Nice momentum." },
-      { min: 7, message: "A full week, and counting." },
-      { min: 14, message: "Two weeks deep." },
-      { min: 30, message: "Remarkable consistency." },
+      { min: 0, messages: ["Start your streak today.", "Today's a good day to begin one."] },
+      { min: 1, messages: ["Day one. Come back tomorrow.", "It starts here. See you tomorrow."] },
+      { min: 2, messages: ["A rhythm is forming.", "Two in a row, keep it going."] },
+      { min: 4, messages: ["Nice momentum.", "This is starting to feel like a habit."] },
+      { min: 7, messages: ["A full week, and counting.", "Seven days straight, real consistency."] },
+      { min: 14, messages: ["Two weeks deep.", "Two weeks in, this is who you are now."] },
+      { min: 30, messages: ["Remarkable consistency.", "A month strong. Genuinely impressive."] },
     ],
     write: "Write",
     fastCardTitle: "Fast mode",
@@ -419,6 +430,34 @@ export default {
     seePastReadings: "See past readings",
     previousReading: "Previous reading",
     nextReading: "Next reading",
+  },
+  // "Quem é {user}" (UPDATES.md round 7 adicional): a flowing narrative, not
+  // insight cards, reached by tapping the user's own name on Today.
+  chronicle: {
+    eyebrow: "Your chronicle",
+    title: "Who {name} is",
+    note: "Not a list of traits. A reading, in one voice, of everything you've shown me so far.",
+    notReadyTitle: "Still gathering the thread",
+    notReadyBody: "One more entry before there's enough of you here to write from.",
+    notReadyBodyPlural: "{count} entries away before there's enough of you here to write from.",
+    correctAll: "Something here is wrong, correct me",
+    correctionPlaceholder: "What did it get wrong?",
+  },
+  // Periodic chapters, "o que você viveu" (UPDATES.md round 7 adicional): a
+  // more elaborate, book-chapter-style narrative over a stretch of entries,
+  // an archive that only grows, distinct from the single always-current
+  // chronicle above.
+  chapters: {
+    eyebrow: "The Oracle's chronicle",
+    title: "What you've lived",
+    note: "Every ten entries, the Oracle looks back and writes a chapter.",
+    chapterLabel: "Chapter {number}",
+    empty: "Nothing written yet. Keep going, the first chapter is still forming.",
+    countdownOne: "One more entry until the next chapter unfolds.",
+    countdownMany: "{count} entries until the next chapter unfolds.",
+    countdownReady: "The next chapter is close now, keep writing.",
+    previousChapter: "Previous chapter",
+    nextChapter: "Next chapter",
   },
   stats: {
     eyebrow: "Stats",

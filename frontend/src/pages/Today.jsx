@@ -182,7 +182,11 @@ export function Today() {
     for (const tier of t.today.streakTiers) {
       if (streak >= tier.min) picked = tier;
     }
-    return picked.message;
+    // One of the tier's variants, not always the same line for the same
+    // streak count (UPDATES.md round 7 follow-up: "não só mostrar o
+    // número", picked once per streak change, not on every render.
+    return pickLine(picked.messages);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streak, t]);
 
   // Random line per carousel slot (UPDATES.md round 5 #3), recomputed only
@@ -465,9 +469,9 @@ export function Today() {
       <div className="today-header">
         <div>
           {preferredName && (
-            <p className="today-greeting">
+            <Link to="/chronicle" className="today-greeting">
               {t.today.greeting.replace("{name}", preferredName)}
-            </p>
+            </Link>
           )}
           <p className="today-date">{today}</p>
           <button

@@ -673,6 +673,16 @@ textarea:focus {
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
   border-radius: 0;
+  /* Fixes the notifications panel rendering behind .app-content on mobile
+     (UPDATES.md bug report). Neither this nor .app-content were positioned,
+     so z-index had no effect on either, and .app-content's own
+     -webkit-overflow-scrolling: touch (needed for inertial scrolling)
+     promotes it to its own compositing layer on iOS Safari, a known WebKit
+     quirk where that layer can paint above later DOM siblings regardless of
+     the normal stacking order. Giving the topbar its own explicit, higher
+     stacking context (below) settles it. */
+  position: relative;
+  z-index: 50;
 }
 
 /* Real SVG icon (UPDATES.md round 4 #6), replacing the old hand-rolled
@@ -769,7 +779,12 @@ textarea:focus {
   position: absolute;
   top: calc(100% + var(--space-2));
   right: 0;
-  z-index: 45;
+  /* Above the topbar's own new z-index: 50 (see .app-topbar), which is what
+     actually fixes the mobile stacking bug, this just keeps it comfortably
+     ahead of that baseline too. will-change keeps it on its own compositing
+     layer for as long as it's open, not only mid-animation. */
+  z-index: 60;
+  will-change: transform;
   width: min(340px, 84vw);
   max-height: min(420px, 70vh);
   overflow-y: auto;
@@ -984,6 +999,7 @@ textarea:focus {
 }
 
 .app-sidebar-link-glyph {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -991,6 +1007,41 @@ textarea:focus {
   height: 28px;
   flex-shrink: 0;
   font-size: 1rem;
+}
+
+/* "A chapter is being written" glow (UPDATES.md round 7 adicional): a
+   quiet, mystical presence signal, not a countdown or progress bar, on
+   purpose no number is ever shown here (see the actual countdown copy on
+   the Chapters page instead). A soft pulsing glow behind the icon, closer
+   to a candle than a notification badge. */
+.app-sidebar-chapter-glow {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--violet);
+  box-shadow: 0 0 6px 1px color-mix(in oklab, var(--violet) 70%, transparent);
+  animation: app-sidebar-chapter-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes app-sidebar-chapter-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar-chapter-glow {
+    animation: none;
+  }
 }
 
 .app-content {

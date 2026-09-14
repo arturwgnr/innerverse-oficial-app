@@ -17,6 +17,8 @@ import { AboutMeHistory } from "./pages/AboutMeHistory.jsx";
 import { Mindfulness } from "./pages/Mindfulness.jsx";
 import { Settings } from "./pages/Settings.jsx";
 import { Stats } from "./pages/Stats.jsx";
+import { Chronicle } from "./pages/Chronicle.jsx";
+import { Chapters } from "./pages/Chapters.jsx";
 
 export default function App() {
   return (
@@ -48,6 +50,8 @@ export default function App() {
                   <Route path="/about-me/history" element={<AboutMeHistory />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/stats" element={<Stats />} />
+                  <Route path="/chronicle" element={<Chronicle />} />
+                  <Route path="/chapters" element={<Chapters />} />
                 </Route>
               </Route>
             </Route>

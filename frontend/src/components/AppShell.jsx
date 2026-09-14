@@ -26,6 +26,7 @@ const NAV_ITEMS = [
 const SIDEBAR_ITEMS = [
   { to: "/today", key: "home" },
   { to: "/calendar", key: "calendar" },
+  { to: "/chapters", key: "chapters" },
   { to: "/stats", key: "stats" },
   { to: "/settings", key: "settings" },
 ];
@@ -62,6 +63,17 @@ function SidebarIcon({ itemKey }) {
             stroke="currentColor"
             strokeWidth="1.8"
             strokeLinecap="round"
+          />
+        </svg>
+      );
+    case "chapters":
+      return (
+        <svg {...common}>
+          <path
+            d="M5 4.5c2.2-1 5-1 7 0v15c-2-1-4.8-1-7 0zM19 4.5c-2.2-1-5-1-7 0v15c2-1 4.8-1 7 0z"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
           />
         </svg>
       );
@@ -104,6 +116,19 @@ function AppShellInner() {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  // Sidebar "chapter being written" glow (UPDATES.md round 7 adicional):
+  // deliberately just a presence/absence signal, not the actual count, so
+  // it reads as "the Oracle is quietly at work" rather than a progress bar.
+  // Fetched once per shell mount, cheap (no LLM call, see routes/
+  // chapters.js's dedicated /countdown endpoint).
+  const [chapterInProgress, setChapterInProgress] = useState(false);
+
+  useEffect(() => {
+    api
+      .get("/api/chapters/countdown")
+      .then((data) => setChapterInProgress(typeof data.entriesUntilNext === "number"))
+      .catch(() => {});
+  }, []);
 
   // Save-resilience queue flush (UPDATES.md round 4 #3): retries any entry
   // that failed to save outright, on app load and again whenever the browser
@@ -174,6 +199,9 @@ function AppShellInner() {
                   >
                     <span className="app-sidebar-link-glyph">
                       <SidebarIcon itemKey={item.key} />
+                      {item.key === "chapters" && chapterInProgress && (
+                        <span className="app-sidebar-chapter-glow" aria-hidden="true" />
+                      )}
                     </span>
                     {t.nav[item.key]}
                   </NavLink>

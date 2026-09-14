@@ -199,6 +199,27 @@ alter table insights add column if not exists position integer not null default 
 create index if not exists insights_user_kind_idx on insights (user_id, kind, generated_at desc);
 create index if not exists insights_analysis_idx on insights (analysis_id, position);
 
+-- 'chronicle' added (round 7 adicional: "Quem é {user}" general chronicle),
+-- existing kinds are unaffected, this only widens what is accepted.
+do $$
+begin
+  alter table insights drop constraint if exists insights_kind_check;
+  alter table insights add constraint insights_kind_check
+    check (kind in ('pattern_summary', 'pattern_card', 'about_me_light', 'about_me_dark', 'entry_analysis_observation', 'chronicle'));
+end $$;
+
+-- The chronicle is a single row per user, kept in sync by hand in
+-- routes/chronicle.js rather than an ON CONFLICT upsert: this table's own
+-- unique(user_id, period_type, period_start) constraint cannot dedupe on
+-- period_start alone here because Postgres never treats two NULLs as equal
+-- for a unique constraint, and period_start is genuinely NULL for this
+-- period_type (it covers no fixed window, unlike a real month/week chapter).
+-- The linked insight_id is what makes "That's not it" work on the
+-- chronicle, same corrections mechanism the rest of the app's insights
+-- already use, without the chronicle's actual content living in the
+-- insights table (which is append-only history, not a single-row shape).
+alter table narrative_summaries add column if not exists insight_id uuid references insights(id) on delete set null;
+
 -- Corrections turn "That's not it" / "True" into their own record, linked back to
 -- the insight and, when relevant, the entry that produced it. Feeds the next
 -- profile merge and future analysis context.
