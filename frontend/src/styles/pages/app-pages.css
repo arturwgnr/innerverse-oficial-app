@@ -1688,6 +1688,26 @@
   color: var(--muted-foreground);
 }
 
+/* The user-driven "reveal" card (UPDATES.md round 7 adicional, revised):
+   appears once enough entries have accumulated, the click itself lives on
+   the button inside, this is just the announcement + framing around it. */
+.chapters-reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+  padding: var(--space-7) var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.chapters-reveal-body {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
 .chapter-card {
   padding: var(--space-7);
   display: flex;

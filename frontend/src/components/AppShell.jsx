@@ -116,9 +116,11 @@ function AppShellInner() {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  // Sidebar "chapter being written" glow (UPDATES.md round 7 adicional):
-  // deliberately just a presence/absence signal, not the actual count, so
-  // it reads as "the Oracle is quietly at work" rather than a progress bar.
+  // Sidebar "chapter being written" glow (UPDATES.md round 7 adicional,
+  // revised): lights up once a chapter is actually ready for the user to
+  // reveal (canReveal, the same threshold that shows the reveal button on
+  // the Chapters page itself), not just whenever any progress exists, so it
+  // is a real "come look" signal rather than a permanent decoration.
   // Fetched once per shell mount, cheap (no LLM call, see routes/
   // chapters.js's dedicated /countdown endpoint).
   const [chapterInProgress, setChapterInProgress] = useState(false);
@@ -126,7 +128,7 @@ function AppShellInner() {
   useEffect(() => {
     api
       .get("/api/chapters/countdown")
-      .then((data) => setChapterInProgress(typeof data.entriesUntilNext === "number"))
+      .then((data) => setChapterInProgress(Boolean(data.canReveal)))
       .catch(() => {});
   }, []);
 

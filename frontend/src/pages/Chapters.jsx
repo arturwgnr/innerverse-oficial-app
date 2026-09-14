@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import { useToast } from "../context/ToastContext.jsx";
 import { api } from "../lib/api.js";
 import { ScreenTitle } from "../components/AppShell.jsx";
 
-// "O que você viveu" (UPDATES.md round 7 adicional): periodic chapters,
-// each covering a 10-entry stretch, an archive that only grows (unlike
-// Chronicle.jsx's single always-current narrative). Visiting this page is
-// what actually triggers the next chapter's generation once enough entries
-// exist (see routes/chapters.js), the sidebar's glow (AppShell.jsx) only
-// ever teases that something is close, it never generates anything itself.
+// "O que você viveu" (UPDATES.md round 7 adicional, revised): periodic
+// chapters, an archive that only grows (unlike Chronicle.jsx's single
+// always-current narrative). At 4 uncovered entries a "new chapter awaits"
+// button appears and the user decides when to reveal it, covering every
+// uncovered entry at that moment, not a fixed batch. If they never click,
+// routes/chapters.js's own safety net generates one automatically once 10
+// accumulate, quietly, with no separate UI for that path.
 export function Chapters() {
   const { t, language } = useLanguage();
+  const { showToast } = useToast();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [index, setIndex] = useState(0);
+  const [revealing, setRevealing] = useState(false);
 
   useEffect(() => {
     api
@@ -21,6 +25,19 @@ export function Chapters() {
       .then(setData)
       .catch((err) => setError(err.message));
   }, []);
+
+  async function handleReveal() {
+    setRevealing(true);
+    try {
+      const result = await api.post("/api/chapters/reveal");
+      setData(result);
+      setIndex(0);
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setRevealing(false);
+    }
+  }
 
   const chapters = data?.chapters || [];
   // Newest first for browsing, same convention as About Me's history page,
@@ -37,7 +54,6 @@ export function Chapters() {
   }
 
   function countdownMessage(count) {
-    if (count === 0) return t.chapters.countdownReady;
     if (count === 1) return t.chapters.countdownOne;
     return t.chapters.countdownMany.replace("{count}", count);
   }
@@ -49,8 +65,17 @@ export function Chapters() {
       {error && <p className="form-error">{error}</p>}
       {!data && !error && <p className="page-note">{t.common.loading}</p>}
 
-      {data && typeof data.entriesUntilNext === "number" && (
-        <p className="chapters-countdown">{countdownMessage(data.entriesUntilNext)}</p>
+      {data && !data.canReveal && data.uncoveredCount > 0 && (
+        <p className="chapters-countdown">{countdownMessage(data.uncoveredCount)}</p>
+      )}
+
+      {data?.canReveal && (
+        <section className="chapters-reveal glass">
+          <p className="chapters-reveal-body">{t.chapters.revealBody}</p>
+          <button type="button" className="button-primary" onClick={handleReveal} disabled={revealing}>
+            {revealing ? t.chapters.revealing : t.chapters.revealButton}
+          </button>
+        </section>
       )}
 
       {data && chapters.length === 0 && <p className="page-note">{t.chapters.empty}</p>}

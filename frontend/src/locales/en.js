@@ -450,12 +450,18 @@ export default {
   chapters: {
     eyebrow: "The Oracle's chronicle",
     title: "What you've lived",
-    note: "Every ten entries, the Oracle looks back and writes a chapter.",
+    note: "Every so often, the Oracle looks back and writes a chapter.",
     chapterLabel: "Chapter {number}",
     empty: "Nothing written yet. Keep going, the first chapter is still forming.",
-    countdownOne: "One more entry until the next chapter unfolds.",
-    countdownMany: "{count} entries until the next chapter unfolds.",
-    countdownReady: "The next chapter is close now, keep writing.",
+    // Countdown toward the reveal button becoming available (round 7
+    // adicional, revised: a user-clicked reveal, not an automatic
+    // generate-on-visit), not toward the higher automatic safety-net
+    // threshold, that one stays a quiet background fallback, never shown.
+    countdownOne: "One more entry until a new chapter can be revealed.",
+    countdownMany: "{count} entries until a new chapter can be revealed.",
+    revealButton: "A new chapter awaits",
+    revealBody: "Enough has happened since the last one. Reveal it whenever you're ready.",
+    revealing: "Writing it now...",
     previousChapter: "Previous chapter",
     nextChapter: "Next chapter",
   },
