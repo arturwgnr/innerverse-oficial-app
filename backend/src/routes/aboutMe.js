@@ -44,15 +44,21 @@ router.get("/", requireAuth, async (req, res) => {
   const generatedAt = profileMetaRows[0]?.about_me_generated_at ?? null;
 
   if (generatedAt) {
-    const { rows: newerEntries } = await pool.query(
-      "select 1 from entries where user_id = $1 and written_at > $2 limit 1",
+    const { rows: newerEntryRows } = await pool.query(
+      "select count(*)::int as count from entries where user_id = $1 and written_at > $2",
       [req.user.id, generatedAt]
     );
-    // Stale the moment a new entry was written since the last generation,
-    // not on a fixed time window (UPDATES.md #6: the old 7 day window kept
-    // this frozen at whatever generated the very first time, often right
-    // after onboarding with zero entries).
-    if (newerEntries.length === 0) {
+    // Waits for 2 new entries since the last generation, not 1 (UPDATES.md
+    // round 7: regenerating off a single fresh entry, isolated, read as
+    // thin and fired far too often). Once that threshold is hit,
+    // analyzeAboutMe below still reads the full entry history plus the
+    // living profile together, same as always, so the two new entries are
+    // read in that shared context, not analyzed on their own. Not a fixed
+    // time window, same reasoning as the original one-entry threshold
+    // (UPDATES.md #6): the old 7 day window kept this frozen at whatever
+    // generated the very first time, often right after onboarding with zero
+    // entries.
+    if (newerEntryRows[0].count < 2) {
       const { rows: cached } = await pool.query(
         `select id, kind, title, body, generated_at
          from insights

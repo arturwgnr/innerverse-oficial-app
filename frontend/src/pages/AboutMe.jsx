@@ -29,6 +29,12 @@ export function AboutMe() {
       .then((result) => {
         setData(result);
         setError(null);
+        // Subtle nudge that the reading actually changed (UPDATES.md round
+        // 7: "avisar o user de forma sutil"), not shown on every visit, only
+        // when this request itself just triggered a fresh generation.
+        if (result.cached === false) {
+          showToast(pickLine(t.toasts.aboutMeUpdated), "success");
+        }
       })
       .catch((err) => setError(err.message));
 
@@ -166,12 +172,24 @@ export function AboutMe() {
       )}
 
       <section className="about-me-quote glass">
-        <p>
-          {daysAway !== null && daysAway >= 2 ? t.aboutMe.awayMessage.replace("{days}", daysAway) : closingLine.main}
-        </p>
-        <p className="about-me-quote-sub">
-          {daysAway !== null && daysAway >= 2 ? t.aboutMe.everyEntry : closingLine.sub}
-        </p>
+        {/* Dynamic mascot (UPDATES.md round 7): "meditating" for the patient,
+            unhurried away-message tone, "hi" for the everyday closing line,
+            same contextual-variant convention the mascot already follows
+            everywhere else in the app. */}
+        <Oracle
+          size={56}
+          variant={daysAway !== null && daysAway >= 2 ? "meditating" : "hi"}
+          float={false}
+          className="about-me-quote-oracle"
+        />
+        <div>
+          <p>
+            {daysAway !== null && daysAway >= 2 ? t.aboutMe.awayMessage.replace("{days}", daysAway) : closingLine.main}
+          </p>
+          <p className="about-me-quote-sub">
+            {daysAway !== null && daysAway >= 2 ? t.aboutMe.everyEntry : closingLine.sub}
+          </p>
+        </div>
       </section>
     </div>
   );

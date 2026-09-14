@@ -53,4 +53,20 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     },
   },
+  // Fixes Google sign-in's "state_mismatch" on Safari/iPhone and in private
+  // tabs (UPDATES.md round 7 known bug). The Postgres adapter already makes
+  // this app "stateful", so Better Auth stores the real OAuth state payload
+  // (callbackURL, codeVerifier, a random single-use value, a 10 minute
+  // expiry) server-side in the verification table, not in a cookie, that
+  // part is already safe. On top of that it also sets a small extra "state"
+  // cookie and re-checks it matches on callback, pure defense in depth, and
+  // that is the piece Safari's Intelligent Tracking Prevention can drop
+  // during the cross-domain redirect chain (frontend on Vercel, backend on
+  // Render, then out to accounts.google.com and back), especially in
+  // Private Browsing. This turns that extra cookie check off; the real
+  // protection (the DB-verified, single-use, expiring state value) is
+  // untouched.
+  account: {
+    skipStateCookieCheck: true,
+  },
 });

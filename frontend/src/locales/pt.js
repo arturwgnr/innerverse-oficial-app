@@ -41,6 +41,11 @@ export default {
       "Entendido. Isso entra na próxima leitura.",
       "Anotado, o espelho se ajusta.",
     ],
+    aboutMeUpdated: [
+      "O Oráculo acabou de aprender um pouco mais sobre você.",
+      "Sua leitura acabou de crescer, uma página nova no que eu sei sobre você.",
+      "Algo mudou, essa leitura está mais recente agora.",
+    ],
     profileSaved: ["Salvo, o Oráculo tomou nota.", "Guardado."],
     passwordChanged: ["Trocada, e guardada em silêncio a partir daqui."],
     correctionConfirmed: ["Marcado como verdade, o registro se mantém.", "Confirmado. O espelho continua limpo."],
@@ -178,6 +183,16 @@ export default {
   },
   today: {
     greeting: "Oi, {name}.",
+    streakUnit: "dias seguidos",
+    streakTiers: [
+      { min: 0, message: "Comece seu streak hoje." },
+      { min: 1, message: "Dia um. Volte amanhã." },
+      { min: 2, message: "Um ritmo está se formando." },
+      { min: 4, message: "Bom ritmo." },
+      { min: 7, message: "Uma semana inteira, e contando." },
+      { min: 14, message: "Duas semanas seguidas." },
+      { min: 30, message: "Consistência notável." },
+    ],
     write: "Escrever",
     fastCardTitle: "Modo rápido",
     fastCardBody: "Humor e o que contribuiu pra ele. Vinte segundos.",

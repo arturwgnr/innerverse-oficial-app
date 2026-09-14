@@ -23,6 +23,51 @@
   color: var(--muted-foreground);
 }
 
+/* Streak badge (UPDATES.md round 7), a compact card in the header's other
+   flex slot (.today-header was already space-between with only one child
+   using it). Warm gold/rose flame colour, deliberately apart from the
+   app's cool violet accent, so it reads as its own little "achievement"
+   surface rather than blending into the rest of the chrome. */
+.streak-badge {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  max-width: 108px;
+}
+
+.streak-badge-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: color-mix(in oklab, var(--gold) 55%, var(--rose));
+}
+
+.streak-badge-count {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--foreground);
+}
+
+.streak-badge-unit {
+  margin: var(--space-1) 0 0;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted-foreground);
+}
+
+.streak-badge-caption {
+  margin: var(--space-2) 0 0;
+  font-size: 0.68rem;
+  line-height: 1.3;
+  color: var(--muted-foreground);
+}
+
 .today-moment-toggle {
   display: flex;
   align-items: baseline;
@@ -634,6 +679,13 @@
   gap: var(--space-2) var(--space-4);
 }
 
+/* Centered under the calendar grid (UPDATES.md round 7: "centralizar as
+   emoções visualmente"), it used to hug the left edge instead of reading as
+   balanced with the centered grid/title above it. */
+.calendar-page .mood-legend {
+  justify-content: center;
+}
+
 .legend-item {
   display: inline-flex;
   align-items: center;
@@ -796,13 +848,15 @@
   flex: 1;
 }
 
+/* White text (UPDATES.md round 7): the dark --foreground text was reading
+   low-contrast against these fairly saturated mood-N/violet backgrounds. */
 .analysis-mood-badge {
   flex-shrink: 0;
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--foreground);
+  color: white;
   white-space: nowrap;
 }
 
@@ -1299,9 +1353,19 @@
   }
 }
 
+/* Now a row with the mascot (UPDATES.md round 7: "adicionar um mascote
+   dinâmico... pra acompanhar as frases"), was just the two <p> tags stacked
+   directly in the glass box. */
 .about-me-quote {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
   padding: var(--space-6);
   margin-top: var(--space-3);
+}
+
+.about-me-quote-oracle {
+  flex-shrink: 0;
 }
 
 .about-me-quote p {

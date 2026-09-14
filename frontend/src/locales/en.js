@@ -50,6 +50,13 @@ export default {
       "Understood. That's folded into the next reading.",
       "Noted, the mirror adjusts.",
     ],
+    // Subtle nudge (UPDATES.md round 7), only fires the moment About Me
+    // actually regenerates, not on every visit.
+    aboutMeUpdated: [
+      "The Oracle just learned a little more about you.",
+      "Your reading just grew, a fresh page in what I know about you.",
+      "Something shifted, this reading is fresher now.",
+    ],
     profileSaved: ["Saved, the Oracle takes note.", "Kept."],
     passwordChanged: ["Changed, and kept quiet from here on."],
     correctionConfirmed: [
@@ -230,6 +237,18 @@ export default {
   },
   today: {
     greeting: "Hey {name}.",
+    // Streak badge (UPDATES.md round 7): top-right of the arrival screen,
+    // caption picked from the highest tier the current streak clears.
+    streakUnit: "day streak",
+    streakTiers: [
+      { min: 0, message: "Start your streak today." },
+      { min: 1, message: "Day one. Come back tomorrow." },
+      { min: 2, message: "A rhythm is forming." },
+      { min: 4, message: "Nice momentum." },
+      { min: 7, message: "A full week, and counting." },
+      { min: 14, message: "Two weeks deep." },
+      { min: 30, message: "Remarkable consistency." },
+    ],
     write: "Write",
     fastCardTitle: "Fast mode",
     fastCardBody: "Mood plus what's behind it. Twenty seconds.",

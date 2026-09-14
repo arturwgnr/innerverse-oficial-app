@@ -112,6 +112,34 @@ export function Landing() {
     event.currentTarget.style.setProperty("--tilt-y", "0deg");
   }
 
+  // "A companion that remembers" mascot (UPDATES.md round 7: "algo mais
+  // interativo que passe a ideia de mascote vivo"). A soft glow tracks the
+  // cursor under the mascot, and a tap/click sends out a quick ring pulse,
+  // on top of the Oracle component's own existing idle float.
+  function handleOracleMove(event) {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const mx = ((event.clientX - rect.left) / rect.width) * 100;
+    const my = ((event.clientY - rect.top) / rect.height) * 100;
+    event.currentTarget.style.setProperty("--mx", `${mx}%`);
+    event.currentTarget.style.setProperty("--my", `${my}%`);
+  }
+
+  function handleOracleLeave(event) {
+    event.currentTarget.style.setProperty("--mx", "50%");
+    event.currentTarget.style.setProperty("--my", "50%");
+  }
+
+  function handleOracleTap(event) {
+    const el = event.currentTarget;
+    el.classList.remove("pulse");
+    // Force a reflow so re-adding the class restarts the animation even on
+    // a rapid second tap, instead of the class already being present and
+    // the animation silently not replaying.
+    void el.offsetWidth;
+    el.classList.add("pulse");
+  }
+
   return (
     <div className="landing">
       <a className="visually-hidden" href="#hero">
@@ -271,18 +299,27 @@ export function Landing() {
         className="landing-section oracle-section nebula grain"
         data-moment="decompress"
       >
-        {/* Reverted to the original two-column grid (UPDATES.md round 6 #2):
-            round 5 #2's tilted corner-sticker treatment was meant for the
-            hero mascot below, not this section, it landed here by mistake. */}
-        <div className="oracle-grid container">
-          <Reveal className="oracle-section-oracle">
-            <div className="oracle-stage nebula grain">
-              <Oracle size={220} variant="hi" className="oracle-section-hero" />
+        {/* Redesigned (UPDATES.md round 7: the old framed nebula/grain
+            "stage" box next to a separate glass card read as busy and
+            unpolished, two disconnected pieces rather than one composition).
+            The mascot now floats directly on the section's own backdrop, no
+            boxed stage, with a cursor-following glow and a tap response
+            layered on top of its existing idle float, so it actually reads
+            as alive rather than a static illustration next to some text. */}
+        <div className="oracle-companion container">
+          <Reveal className="oracle-companion-mascot-wrap">
+            <div
+              className="oracle-companion-mascot"
+              onMouseMove={handleOracleMove}
+              onMouseLeave={handleOracleLeave}
+              onClick={handleOracleTap}
+            >
+              <Oracle size={200} variant="hi" className="oracle-section-hero oracle-companion-oracle" />
             </div>
           </Reveal>
-          <Reveal delay={120}>
+          <Reveal delay={120} className="oracle-companion-bubble-wrap">
             <p className="eyebrow">{t.landing.oracleSection.eyebrow}</p>
-            <div className="oracle-quote glass">
+            <div className="oracle-quote glass oracle-companion-bubble">
               <p>{t.landing.oracleSection.quote}</p>
               <p className="oracle-quote-sub">
                 {t.landing.oracleSection.quoteSub}

@@ -25,6 +25,23 @@
   padding: var(--space-16) 0;
 }
 
+/* Mobile reorganization (UPDATES.md round 7: "repensar o layout de cada
+   seção especificamente pro mobile, não só ajustar breakpoints"). Forcing
+   every section to a full 100dvh minimum made sense on a wide desktop
+   screen with generous horizontal room to spare, on a narrow phone
+   portrait it just left the shorter, text-only sections (why-it-works,
+   closing) with a lot of dead vertical space above and below their actual
+   content. Sections now size to their own content on mobile, the hero
+   is the deliberate exception, kept full height since its own content
+   (title, body, CTA row, visual) already runs close to that height anyway
+   and it is the one section that should still feel like a real "arrival". */
+@media (max-width: 640px) {
+  .landing-section:not(.hero-section) {
+    min-height: auto;
+    padding: var(--space-12) 0;
+  }
+}
+
 /* Scroll reveal, matches /references/landing's Reveal component */
 .reveal {
   opacity: 0;
@@ -236,6 +253,16 @@
   /* Clears the fixed nav (~82px tall) on short viewports where the section's
      own vertical centering would otherwise sit hero content behind it. */
   margin-top: var(--space-12);
+}
+
+@media (max-width: 640px) {
+  .hero-grid {
+    /* The fixed nav wraps to two rows on narrow phones (see .landing-nav's
+       own max-width:560px rule), taller than the desktop bar, this clears
+       it without the large desktop gap on top of that. */
+    margin-top: var(--space-8);
+    gap: var(--space-8);
+  }
 }
 
 .hero-title {
@@ -670,16 +697,21 @@
   font-weight: 400;
 }
 
+/* Mobile reorganization (UPDATES.md round 7): a 2x2 grid even at phone
+   widths, not a single column that turns four short cards (a window, a
+   label, one line of tagline) into a long, thin scroll. Each moment already
+   reads fine at half-width, "the day's four moments" also just reads more
+   like a real grid this way instead of a list. */
 .moments-grid {
   margin-top: var(--space-10);
   display: grid;
-  gap: var(--space-4);
-  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  grid-template-columns: repeat(2, 1fr);
 }
 
 @media (min-width: 640px) {
   .moments-grid {
-    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
   }
 }
 
@@ -867,6 +899,20 @@
   font-size: 0.8rem;
 }
 
+@media (max-width: 640px) {
+  .moment-preview-card {
+    padding: var(--space-4);
+  }
+
+  .moment-preview-card h3 {
+    font-size: 1rem;
+  }
+
+  .moment-preview-card p:last-child {
+    font-size: 0.75rem;
+  }
+}
+
 /* The six mood colors get their only landing page appearance here, reusing
    the same .mood-legend/.legend-item/.legend-dot markup as the Calendar
    page (styles/pages/app-pages.css) so a visitor already recognizes it once
@@ -888,60 +934,120 @@
   justify-content: center;
 }
 
-/* Oracle section, reverted to its original two-column grid (UPDATES.md
-   round 6 #2: round 5 #2's tilted corner-sticker treatment was meant for
-   the hero mascot instead, see .hero-visual-oracle below). */
-.oracle-grid {
-  display: grid;
-  gap: var(--space-10);
+/* Oracle section, redesigned (UPDATES.md round 7: the old framed nebula/
+   grain "stage" square next to a separate glass card read as busy and
+   crude, two disconnected pieces doing their own thing instead of one
+   composition). The mascot now floats straight on the section's own
+   backdrop, no boxed stage, closer to the quote it's "speaking", with a
+   cursor-tracking glow and a tap pulse as the actual interactivity, layered
+   on top of the Oracle component's own idle float (kept, not replaced). */
+.oracle-companion {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: var(--space-8);
+  text-align: center;
 }
 
-.oracle-section-oracle {
+.oracle-companion-mascot-wrap {
   display: flex;
   justify-content: center;
 }
 
-/* More visual weight than a bare floating mascot (UPDATES.md round 3 #6.3):
-   the Oracle stands on its own framed "stage" instead of sitting directly
-   on the section's own nebula background, same nebula/grain technique as
-   the hero's preview card, giving the two matching, deliberate treatments
-   applied at different points on the page rather than one being an
-   afterthought. */
-.oracle-stage {
+.oracle-companion-mascot {
+  --mx: 50%;
+  --my: 50%;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+/* The cursor-tracking glow (UPDATES.md round 7's interactivity ask): a soft
+   light that follows the pointer under the mascot, --mx/--my set in
+   Landing.jsx's onMouseMove. Static center position (no glow movement) on
+   touch devices, which never fire mousemove, so nothing looks stuck. */
+.oracle-companion-mascot::before {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  z-index: -1;
+  background: radial-gradient(
+    45% 45% at var(--mx) var(--my),
+    color-mix(in oklab, var(--violet) 50%, transparent),
+    transparent 70%
+  );
+  filter: blur(24px);
+}
+
+/* Tap response: a quick expanding ring, added/removed as a class in
+   Landing.jsx rather than a CSS-only :active state, so it plays once per
+   tap instead of only lasting as long as the pointer is held down. */
+.oracle-companion-mascot::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  z-index: -1;
+  border-radius: 50%;
+  border: 2px solid color-mix(in oklab, var(--violet) 55%, transparent);
+  opacity: 0;
+}
+
+.oracle-companion-mascot.pulse::after {
+  animation: oracle-companion-pulse 0.6s var(--ease-out);
+}
+
+@keyframes oracle-companion-pulse {
+  from {
+    opacity: 0.9;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oracle-companion-mascot.pulse::after {
+    animation: none;
+  }
+}
+
+.oracle-companion-bubble-wrap {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: min(320px, 78vw);
-  aspect-ratio: 1 / 1;
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-lift);
 }
 
-/* Toned down from the shared .nebula::before default (EDITS.md round 5):
-   full strength here was stacking on top of .oracle-section's own wash
-   right behind the mascot, in a box this small it read as a muddy blob
-   rather than a stage. Faster drift keeps it feeling just as alive. */
-.oracle-stage.nebula::before {
-  background-image: radial-gradient(60% 42% at 18% 8%, color-mix(in oklab, var(--tone-1) 30%, transparent), transparent 70%),
-    radial-gradient(55% 40% at 88% 14%, color-mix(in oklab, var(--tone-3) 36%, transparent), transparent 72%),
-    radial-gradient(60% 45% at 78% 82%, color-mix(in oklab, var(--tone-2) 36%, transparent), transparent 74%),
-    radial-gradient(50% 38% at 12% 88%, color-mix(in oklab, var(--tone-1) 28%, transparent), transparent 68%);
-  animation-duration: 22s;
-}
-
-.oracle-quote {
+/* A speech-bubble tail pointing up at the mascot (reusing the hero
+   balloon's own pointer trick), so the quote reads as the mascot's own
+   voice, one composition, instead of an unrelated card sitting beside it. */
+.oracle-companion-bubble {
+  position: relative;
   margin-top: var(--space-5);
   max-width: 32rem;
   padding: var(--space-7);
+  text-align: left;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.oracle-companion-bubble::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 18px;
+  height: 18px;
+  background: var(--surface);
+  border-left: 1px solid var(--surface-border);
+  border-top: 1px solid var(--surface-border);
+  border-radius: 4px;
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .oracle-quote:hover {
+  .oracle-companion-bubble:hover {
     transform: translateY(-3px);
   }
 }
@@ -958,12 +1064,42 @@
 }
 
 @media (min-width: 860px) {
-  .oracle-grid {
-    grid-template-columns: 0.8fr 1.2fr;
+  .oracle-companion {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
+    gap: var(--space-12);
   }
 
-  .oracle-section-oracle {
-    justify-content: flex-start;
+  .oracle-companion-bubble-wrap {
+    align-items: flex-start;
+  }
+
+  /* Row layout points the bubble tail at the mascot's new position (to its
+     left) instead of straight up. */
+  .oracle-companion-bubble {
+    margin-top: 0;
+  }
+
+  .oracle-companion-bubble::before {
+    top: 50%;
+    left: -9px;
+    transform: translateY(-50%) rotate(45deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .oracle-companion {
+    gap: var(--space-6);
+  }
+
+  .oracle-companion-oracle {
+    --oracle-size: 150px !important;
+  }
+
+  .oracle-companion-bubble {
+    padding: var(--space-5);
   }
 }
 
@@ -1018,6 +1154,12 @@
   padding: var(--space-16) 0 var(--space-8);
 }
 
+@media (max-width: 640px) {
+  .landing-footer {
+    padding: var(--space-10) 0 var(--space-6);
+  }
+}
+
 .landing-footer-accent {
   position: absolute;
   top: 0;
@@ -1057,6 +1199,16 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-12);
+}
+
+@media (max-width: 640px) {
+  /* The two link columns side by side even at phone width (UPDATES.md
+     round 7): the desktop gap was wide enough to force an awkward wrap on
+     narrow screens, a tighter gap keeps "Explore"/"Account" as a real
+     two-column row instead of one stacking under the other. */
+  .footer-nav-columns {
+    gap: var(--space-8);
+  }
 }
 
 .footer-links {

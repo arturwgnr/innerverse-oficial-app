@@ -16,7 +16,12 @@ const LOGIN_GREETING_FLAG = "innerverse.justSignedIn";
 const MOODS = [1, 2, 3, 4, 5, 6];
 
 // Several alternatives per moment, not just one, "Another template" (below)
-// actually has something to cycle through now.
+// actually has something to cycle through now. Reformulated with more
+// variety around each moment's own register (UPDATES.md round 7): morning
+// leans on setting an intention plus a quick checkup on how you're actually
+// arriving, afternoon on course-correcting and surfacing what's changed
+// since the morning, night on an honest, unflinching accounting of the day
+// ("tribunal") before actually closing it.
 const DEFAULT_PROMPTS = {
   morning: [
     {
@@ -30,6 +35,18 @@ const DEFAULT_PROMPTS = {
     {
       en: "What's one thing you don't want to forget to do today?",
       pt: "Qual é uma coisa que você não quer esquecer de fazer hoje?",
+    },
+    {
+      en: "What's the one thing today needs to go right?",
+      pt: "Qual é a única coisa que hoje precisa dar certo?",
+    },
+    {
+      en: "How are you actually arriving this morning, before the day asks anything of you?",
+      pt: "Como você está chegando nessa manhã, antes do dia começar a pedir coisas?",
+    },
+    {
+      en: "What would you regret not doing today?",
+      pt: "Do que você se arrependeria de não fazer hoje?",
     },
   ],
   afternoon: [
@@ -45,6 +62,18 @@ const DEFAULT_PROMPTS = {
       en: "Is there anything from this morning still on your mind?",
       pt: "Tem algo de hoje de manhã que ainda está na sua cabeça?",
     },
+    {
+      en: "What would you do differently if the day restarted right now?",
+      pt: "O que você faria diferente se o dia recomeçasse agora?",
+    },
+    {
+      en: "What's actually different from what you expected this morning?",
+      pt: "O que está realmente diferente do que você esperava hoje de manhã?",
+    },
+    {
+      en: "Is today still headed where you wanted it to?",
+      pt: "O dia ainda está indo pra onde você queria?",
+    },
   ],
   night: [
     {
@@ -58,6 +87,18 @@ const DEFAULT_PROMPTS = {
     {
       en: "What are you carrying into tomorrow that you'd rather leave here?",
       pt: "O que você está levando pra amanhã que preferia deixar aqui?",
+    },
+    {
+      en: "Where did you fall short of your own intention today?",
+      pt: "Onde você ficou aquém da sua própria intenção hoje?",
+    },
+    {
+      en: "What's the one thing today deserves real credit for?",
+      pt: "Qual é a única coisa que hoje merece crédito de verdade?",
+    },
+    {
+      en: "What are you ready to close the book on tonight?",
+      pt: "O que você está pronto pra encerrar hoje à noite?",
     },
   ],
   decompress: [{ en: "", pt: "" }],
@@ -117,6 +158,26 @@ export function Today() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboardingLoading]);
+
+  // Streak badge (UPDATES.md round 7): reuses /api/stats' already-computed
+  // currentStreak (Stats page has its own render of the same number),
+  // rather than re-deriving it from raw entries here.
+  const [streak, setStreak] = useState(null);
+  useEffect(() => {
+    api
+      .get("/api/stats")
+      .then((data) => setStreak(data.currentStreak))
+      .catch(() => {});
+  }, []);
+
+  const streakMessage = useMemo(() => {
+    if (streak === null) return "";
+    let picked = t.today.streakTiers[0];
+    for (const tier of t.today.streakTiers) {
+      if (streak >= tier.min) picked = tier;
+    }
+    return picked.message;
+  }, [streak, t]);
 
   // Random line per carousel slot (UPDATES.md round 5 #3), recomputed only
   // when the moment actually changes, not on every render, so it doesn't
@@ -421,6 +482,25 @@ export function Today() {
               : `${language === "pt" ? "Detectado automaticamente" : "Auto-detected"} · ${t.moments[moment].window}`}
           </p>
         </div>
+
+        {/* Streak badge (UPDATES.md round 7), top-right corner, its caption
+            varies by streak size (see streakMessage above). Only rendered
+            once the count has actually loaded, no placeholder flash of "0". */}
+        {streak !== null && (
+          <div className="streak-badge glass">
+            <div className="streak-badge-top">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="streak-badge-flame" aria-hidden="true">
+                <path
+                  d="M12 2c1 3-2.5 4.5-2.5 7.5a2.5 2.5 0 0 0 5 0c0-1-0.5-1.8-0.5-1.8 2 1 3 3.3 3 5.3a5 5 0 0 1-10 0c0-4 3-6 3.5-9.5C10.7 3 11.3 2.5 12 2Z"
+                  fill="currentColor"
+                />
+              </svg>
+              <span className="streak-badge-count">{streak}</span>
+            </div>
+            <p className="streak-badge-unit">{t.today.streakUnit}</p>
+            <p className="streak-badge-caption">{streakMessage}</p>
+          </div>
+        )}
       </div>
 
       {switcherOpen && (
