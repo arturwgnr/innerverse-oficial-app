@@ -133,11 +133,16 @@ export function Today() {
   const [suggestingChange, setSuggestingChange] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get("compose")) setSearchParams({}, { replace: true });
-    // Only ever needs to fire once, off the initial URL, not every time
-    // searchParams itself changes (that would fight setSearchParams below).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Depends on searchParams, not just the initial URL: React Router keeps
+    // Today mounted for a same-route navigation (bottom nav's "+" links to
+    // /today?compose=1 from Today itself), so the lazy useState above only
+    // ever catches a fresh mount. Without this, tapping "+" while already on
+    // Today silently did nothing.
+    if (searchParams.get("compose")) {
+      setStage("write");
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Oracle-voiced sign-in greeting (UPDATES.md round 4 #2): Login.jsx sets a
   // flag right before its full-page redirect to /today, this is the first
