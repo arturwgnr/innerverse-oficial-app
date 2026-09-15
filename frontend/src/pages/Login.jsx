@@ -4,6 +4,7 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 import { GoogleIcon } from "../components/GoogleIcon.jsx";
 import { signIn, signUp } from "../lib/authClient.js";
+import { pickLine } from "../lib/toastCopy.js";
 
 export function Login() {
   const { t, language } = useLanguage();
@@ -28,7 +29,7 @@ export function Login() {
           : await signUp.email({ email, password, name: name || email.split("@")[0] });
 
       if (result.error) {
-        showToast(result.error.message || t.common.genericError, "error");
+        showToast(result.error.message || pickLine(t.common.genericError), "error");
       } else {
         // Read by Today.jsx right after this reload to fire an Oracle-voiced
         // greeting (UPDATES.md round 4 #2). Only a sign-in, not a sign-up,

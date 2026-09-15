@@ -1,5 +1,6 @@
 import en from "../locales/en.js";
 import pt from "../locales/pt.js";
+import { pickLine } from "./toastCopy.js";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 const dictionaries = { en, pt };
@@ -30,7 +31,7 @@ async function request(path, { method = "GET", body, headers } = {}) {
     // The browser/network layer throwing (offline, unreachable server, CORS)
     // surfaces as raw wording like "Failed to fetch", never meant for a non
     // technical reader (UPDATES.md #2). Always a plain, friendly message here.
-    throw new Error(t.common.networkError);
+    throw new Error(pickLine(t.common.networkError));
   }
 
   if (!response.ok) {
@@ -38,7 +39,7 @@ async function request(path, { method = "GET", body, headers } = {}) {
     // Only trust a plain string from our own API as user-facing copy. Any
     // other shape (validation error objects, a bare statusText, no body at
     // all) falls back to friendly copy instead of being dumped raw.
-    const message = typeof error?.error === "string" ? error.error : t.common.genericError;
+    const message = typeof error?.error === "string" ? error.error : pickLine(t.common.genericError);
     throw new Error(message);
   }
 

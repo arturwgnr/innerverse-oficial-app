@@ -59,7 +59,7 @@ export function Settings() {
         newPassword,
         revokeOtherSessions: true,
       });
-      if (error) throw new Error(error.message || t.common.genericError);
+      if (error) throw new Error(error.message || pickLine(t.common.genericError));
       setCurrentPassword("");
       setNewPassword("");
       showToast(pickLine(t.toasts.passwordChanged), "success");

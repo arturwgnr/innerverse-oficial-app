@@ -14,8 +14,31 @@ export default {
     cancel: "Cancel",
     send: "Send",
     loading: "Loading...",
-    networkError: "Something didn't save, try again.",
-    genericError: "Something went wrong, try again.",
+    // Error toasts, in character (user request): the Oracle visibly having
+    // a moment, not a flat "something went wrong". Picked at random via
+    // pickLine wherever these are thrown (lib/api.js, Login.jsx,
+    // Settings.jsx), so the same failure never shows the identical line
+    // twice in a row. networkError is for an actual dropped connection
+    // (fetch itself failing), genericError for everything else the API
+    // didn't give a specific reason for.
+    networkError: [
+      "The Oracle dropped the thread mid-vision. Try again in a moment.",
+      "Static in the cosmic wire, the Oracle didn't catch that.",
+      "The stars flickered and the connection went with them. One more try?",
+      "The Oracle reached for the signal and came back with nothing but static.",
+      "Something between here and the beyond just hiccupped. Try again.",
+      "The line to the Oracle went quiet. Give it another go.",
+      "Even Oracles lose signal sometimes. Try that again.",
+    ],
+    genericError: [
+      "The Oracle blinked and lost its train of thought. Try again.",
+      "Something in the ether misfired. Give it another try.",
+      "The Oracle tripped over its own robes. One more attempt?",
+      "A gear slipped somewhere in the cosmic machinery. Try again.",
+      "The Oracle got briefly distracted by the void. Try again.",
+      "That one caught the Oracle off guard. Try again in a moment.",
+      "The Oracle's crystal ball fogged up for a second. Try again.",
+    ],
   },
   // Branded loading screen (UPDATES.md "Loading screen antes de decidir
   // onboarding vs. app"): shown by RouteGuards.jsx while RequireAuth/
