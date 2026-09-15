@@ -86,7 +86,7 @@
   text-decoration: underline;
   text-underline-offset: 4px;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: color 0.15s var(--ease-out);
 }
 
 .login-switch:hover {
@@ -211,7 +211,7 @@
   cursor: pointer;
   padding: var(--space-1);
   line-height: 1;
-  transition: color 0.15s ease;
+  transition: color 0.15s var(--ease-out);
 }
 
 .onboarding-back:hover:not(:disabled) {
@@ -245,15 +245,22 @@
   cursor: pointer;
   color: var(--foreground);
   font-size: 0.95rem;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  transition:
+    transform 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out),
+    border-color 0.15s var(--ease-out),
+    background 0.15s var(--ease-out);
 }
 
 /* Previously just a barely-visible 1px lift, easy to miss with no colour or
    border change alongside it (EDITS.md round 3: "no feedback state"). Adds
-   an actual border/background tint on top of the lift. */
+   an actual border/background tint on top of the lift, plus a soft glow
+   (round 8) that reads as an invitation rather than a state already picked,
+   the `.active` ring below stays visually distinct from this hover glow. */
 .onboarding-option:hover {
   border-color: color-mix(in oklab, var(--primary) 35%, var(--surface-border));
   background: color-mix(in oklab, var(--primary) 6%, var(--surface));
+  box-shadow: 0 0 16px -4px color-mix(in oklab, var(--primary) 30%, transparent);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -310,7 +317,7 @@
   font-size: 0.75rem;
   color: var(--muted-foreground);
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: color 0.15s var(--ease-out);
 }
 
 .onboarding-skip:hover {

@@ -185,8 +185,8 @@
   color: inherit;
   cursor: pointer;
   transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    transform 0.18s var(--ease-out),
+    box-shadow 0.18s var(--ease-out);
 }
 
 /* Gated behind hover:hover (emil-design-eng): touch devices fire :hover on
@@ -195,6 +195,7 @@
 @media (hover: hover) and (pointer: fine) {
   .shortcut-card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 0 18px -4px color-mix(in oklab, var(--primary) 30%, transparent);
   }
 }
 
@@ -272,13 +273,15 @@
   cursor: pointer;
   padding: var(--space-1) var(--space-3);
   transition:
-    background 0.15s ease,
-    color 0.15s ease;
+    background 0.15s var(--ease-out),
+    color 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out);
 }
 
 .entry-back:hover {
   background: var(--accent);
   color: var(--accent-foreground);
+  box-shadow: 0 0 12px -3px color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
 .entry-moment-label {
@@ -417,14 +420,15 @@
   padding: var(--space-5) var(--space-2);
   cursor: pointer;
   transition:
-    transform 0.15s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
+    transform 0.15s var(--ease-out),
+    box-shadow 0.18s var(--ease-out),
+    background 0.18s var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .fast-mood-cell:hover {
     transform: translateY(-2px);
+    box-shadow: 0 0 16px -4px color-mix(in oklab, var(--primary) 30%, transparent);
   }
 }
 
@@ -535,14 +539,15 @@
   color: var(--foreground);
   cursor: pointer;
   transition:
-    background 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.12s ease;
+    background 0.18s var(--ease-out),
+    box-shadow 0.18s var(--ease-out),
+    transform 0.12s var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .fast-reason-chip:hover {
+  .fast-reason-chip:not(.active):hover {
     transform: translateY(-1px);
+    box-shadow: 0 0 10px -3px color-mix(in oklab, var(--primary) 30%, transparent);
   }
 }
 
@@ -586,10 +591,26 @@
 .calendar-arrow {
   background: none;
   border: none;
+  border-radius: var(--radius-full);
   font-size: 1.4rem;
   cursor: pointer;
   color: var(--foreground);
   padding: 0 var(--space-2);
+  transition:
+    background 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out),
+    transform 0.15s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .calendar-arrow:hover {
+    background: color-mix(in oklab, var(--primary) 8%, transparent);
+    box-shadow: 0 0 10px -3px color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+}
+
+.calendar-arrow:active {
+  transform: scale(0.92);
 }
 
 .calendar-grid {
@@ -944,6 +965,9 @@
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
+  transition:
+    background 0.15s var(--ease-out),
+    color 0.15s var(--ease-out);
 }
 
 .analysis-card-dismiss:hover {
@@ -969,10 +993,11 @@
   border: 1px solid transparent;
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease;
+    background 0.15s var(--ease-out),
+    color 0.15s var(--ease-out),
+    border-color 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out),
+    transform 0.15s var(--ease-out);
 }
 
 .analysis-action-view {
@@ -992,6 +1017,7 @@
 
 .analysis-action-retry:hover {
   background: color-mix(in oklab, var(--accent) 82%, var(--primary));
+  box-shadow: 0 0 12px -3px color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
 .analysis-action-retry:disabled {
@@ -1038,13 +1064,15 @@
   color: var(--foreground);
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    opacity 0.15s ease;
+    background 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out),
+    opacity 0.15s var(--ease-out);
 }
 
 .analysis-week-arrow:hover:not(:disabled) {
   background: var(--accent);
   color: var(--accent-foreground);
+  box-shadow: 0 0 10px -3px color-mix(in oklab, var(--primary) 30%, transparent);
 }
 
 .analysis-week-arrow:disabled {
@@ -1122,9 +1150,10 @@
   font-size: 0.7rem;
   cursor: pointer;
   transition:
-    transform 0.12s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
+    transform 0.12s var(--ease-out),
+    border-color 0.15s var(--ease-out),
+    color 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out);
 }
 
 .correction-buttons button:hover {
@@ -1133,6 +1162,7 @@
      elsewhere in the app. */
   border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
   color: var(--foreground);
+  box-shadow: 0 0 10px -3px color-mix(in oklab, var(--primary) 30%, transparent);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1268,15 +1298,17 @@
   cursor: pointer;
   margin-bottom: var(--space-3);
   transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease;
+    background 0.15s var(--ease-out),
+    color 0.15s var(--ease-out),
+    border-color 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out);
 }
 
 .about-me-correct:hover {
   background: var(--accent);
   color: var(--accent-foreground);
   border-color: transparent;
+  box-shadow: 0 0 14px -3px color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
 /* Now a <Link> to its own page (UPDATES.md round 5 #5), not an inline
@@ -1296,11 +1328,14 @@
   text-decoration: none;
   cursor: pointer;
   margin-bottom: var(--space-4);
-  transition: color 0.15s ease;
+  transition:
+    color 0.15s var(--ease-out),
+    border-color 0.15s var(--ease-out);
 }
 
 .about-me-history-toggle:hover {
   color: var(--foreground);
+  border-color: color-mix(in oklab, var(--primary) 40%, var(--surface-border));
 }
 
 .about-me-history-page {
@@ -1322,13 +1357,15 @@
   text-decoration: none;
   padding: var(--space-1) var(--space-3);
   transition:
-    background 0.15s ease,
-    color 0.15s ease;
+    background 0.15s var(--ease-out),
+    color 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out);
 }
 
 .about-me-history-back:hover {
   background: var(--accent);
   color: var(--accent-foreground);
+  box-shadow: 0 0 12px -3px color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
 .about-me-history-nav {
