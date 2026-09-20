@@ -1,5 +1,6 @@
 import { callLLMJson } from "./llm.js";
 import { describeMood } from "../lib/moods.js";
+import { getLanguageInstruction } from "../lib/language.js";
 
 // Deep, standalone analysis of a single journal entry (replaces the old
 // cross-entry Patterns concept, see CLAUDE.md/UPDATES.md). Grounded in the
@@ -77,6 +78,7 @@ export async function generateEntryAnalysis({ entry, livingProfile, recentEntrie
       mood: describeMood(entry.mood),
       bullets: entry.bullets,
       occurred_at: entry.occurred_at,
+      language: entry.language,
     },
   });
 
@@ -84,7 +86,7 @@ export async function generateEntryAnalysis({ entry, livingProfile, recentEntrie
   // deep analysis the user actually reads, see UPDATES.md "Prompt: fallback
   // automático Gemini -> OpenRouter (Claude)".
   return callLLMJson({
-    system: ENTRY_ANALYSIS_SYSTEM_PROMPT,
+    system: `${ENTRY_ANALYSIS_SYSTEM_PROMPT}\n\n${getLanguageInstruction(entry.language)}`,
     messages: [{ role: "user", content: userMessage }],
     maxTokens: 500,
     responseSchema: ENTRY_ANALYSIS_SCHEMA,
@@ -148,10 +150,15 @@ export async function analyzeAboutMe({ entries, livingProfile }) {
     entries: entries.map((e) => ({ ...e, mood: describeMood(e.mood) })),
   });
 
+  // entries is ordered most-recent-first (see routes/aboutMe.js), so its own
+  // language is the simplest signal for which language this whole batch
+  // should read in, no "dominant language" logic needed (UPDATES.md).
+  const outputLanguage = entries[0]?.language;
+
   // Flagship OpenRouter model on fallback, same reasoning as
   // generateEntryAnalysis above: also deep, user-facing content.
   return callLLMJson({
-    system: ABOUT_ME_SYSTEM_PROMPT,
+    system: `${ABOUT_ME_SYSTEM_PROMPT}\n\n${getLanguageInstruction(outputLanguage)}`,
     messages: [{ role: "user", content: userMessage }],
     maxTokens: 900,
     responseSchema: ABOUT_ME_SCHEMA,

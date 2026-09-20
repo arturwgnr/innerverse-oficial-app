@@ -84,7 +84,7 @@ router.get("/", requireAuth, async (req, res) => {
 
   const [{ rows: entries }, { rows: profileRows }] = await Promise.all([
     pool.query(
-      `select moment, mode, text_content, mood, bullets, occurred_at
+      `select moment, mode, text_content, mood, bullets, occurred_at, language
        from entries where user_id = $1 order by occurred_at desc limit 200`,
       [req.user.id]
     ),

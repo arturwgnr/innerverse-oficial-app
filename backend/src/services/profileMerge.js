@@ -1,4 +1,5 @@
 import { callLLMJson } from "./llm.js";
+import { getLanguageInstruction } from "../lib/language.js";
 
 const MERGE_SYSTEM_PROMPT = `You maintain a living profile for a journaling app called Innerverse.
 The profile is a compact JSON object (never longer than roughly 2500 tokens) describing
@@ -17,6 +18,17 @@ export async function mergeProfile({ currentProfile, evidence, evidenceType }) {
     evidence,
   });
 
+  // Same fix as analysis.js (UPDATES.md "análises da IA sempre saem em
+  // inglês"): any narrative text the merge writes into the profile should
+  // match the evidence's language, not default to English, since that
+  // English-leaning profile text otherwise pulls later analyses back toward
+  // English too. Only 'entry' evidence carries a language field today,
+  // correction/onboarding evidence has none, so the instruction is only
+  // added when there's an actual signal to follow.
+  const system = evidence?.language
+    ? `${MERGE_SYSTEM_PROMPT}\n\n${getLanguageInstruction(evidence.language)}`
+    : MERGE_SYSTEM_PROMPT;
+
   // No responseSchema on purpose: the profile is deliberately open ended
   // (see prompt above, "compact JSON object... no fixed fields"), forcing a
   // fixed shape here would fight the whole design. responseMimeType alone
@@ -26,7 +38,7 @@ export async function mergeProfile({ currentProfile, evidence, evidenceType }) {
   // entry, the high volume/low stakes background call OPENROUTER_MODEL_CHEAP
   // exists for.
   return callLLMJson({
-    system: MERGE_SYSTEM_PROMPT,
+    system,
     messages: [{ role: "user", content: userMessage }],
     maxTokens: 3000,
     cheap: true,
