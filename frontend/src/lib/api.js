@@ -2,7 +2,14 @@ import en from "../locales/en.js";
 import pt from "../locales/pt.js";
 import { pickLine } from "./toastCopy.js";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+// Empty string in prod (UPDATES.md "Fix: mobile Safari login"): requests hit
+// /api/* on the same Vercel origin, which vercel.json now rewrites through
+// to the Render backend server-side, so the browser only ever sees one
+// origin and the session cookie is first-party instead of cross-site (mobile
+// Safari's ITP silently drops cross-site cookies even with SameSite=None;
+// Secure set correctly, which is what was breaking session persistence and
+// Google OAuth there).
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "" : "http://localhost:4000");
 const dictionaries = { en, pt };
 const LANGUAGE_STORAGE_KEY = "innerverse.language";
 

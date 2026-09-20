@@ -356,6 +356,14 @@
   box-shadow: var(--shadow-lift);
   transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
   transition: transform 0.3s var(--ease-out);
+  /* UPDATES.md (mobile Safari round): WebKit has a long-standing bug where
+     overflow:hidden + border-radius fails to clip a child that has its own
+     filter:blur() (::before below, the animated nebula wash) once this
+     element also carries a transform, the corner reads as a sharp square
+     where the blurred rectangle bleeds past the curve instead of a smooth
+     radius. Forcing the mask compositing path is the standard workaround,
+     Chromium/Firefox already clip correctly and just ignore this. */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -483,7 +491,9 @@
   .hero-visual-oracle {
     left: -4%;
     bottom: -5%;
-    --oracle-size: 130px !important;
+    /* UPDATES.md (mobile Safari round): bumped up a notch from 130px, the
+       mascot was reading a little small/lost at this breakpoint. */
+    --oracle-size: 145px !important;
   }
 }
 
@@ -497,7 +507,8 @@
   .hero-visual-oracle {
     left: -3%;
     bottom: -4%;
-    --oracle-size: 105px !important;
+    /* Same subtle bump as the tier above, up from 105px. */
+    --oracle-size: 120px !important;
   }
 }
 
