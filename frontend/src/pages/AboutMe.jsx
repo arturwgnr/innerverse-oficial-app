@@ -6,9 +6,10 @@ import { api } from "../lib/api.js";
 import { pickLine } from "../lib/toastCopy.js";
 import { Oracle } from "../components/Oracle.jsx";
 import { AboutMeSkeleton } from "../components/Skeleton.jsx";
+import { LoadError } from "../components/LoadError.jsx";
 
 export function AboutMe() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { showToast } = useToast();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -20,10 +21,8 @@ export function AboutMe() {
   // instead of the same two fixed sentences forever.
   const closingLine = useMemo(() => pickLine(t.aboutMe.closingLines), [t]);
 
-  useEffect(() => {
-    // React StrictMode fires this effect twice in dev, so a stray failure
-    // from one of the two calls (e.g. a transient AI parse error) must not
-    // stick around next to a successful result from the other.
+  function loadAboutMe() {
+    setError(null);
     api
       .get("/api/about-me")
       .then((result) => {
@@ -37,6 +36,13 @@ export function AboutMe() {
         }
       })
       .catch((err) => setError(err.message));
+  }
+
+  useEffect(() => {
+    // React StrictMode fires this effect twice in dev, so a stray failure
+    // from one of the two calls (e.g. a transient AI parse error) must not
+    // stick around next to a successful result from the other.
+    loadAboutMe();
 
     // Real gap since the last entry, not a hardcoded placeholder
     // (UPDATES.md #6). Entries come back newest first.
@@ -49,6 +55,7 @@ export function AboutMe() {
         setDaysAway(Math.max(0, Math.floor(gapMs / (1000 * 60 * 60 * 24))));
       })
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSendCorrection(event) {
@@ -81,23 +88,29 @@ export function AboutMe() {
     <div className="about-me-page">
       <div className="about-me-hero">
         <Oracle size={168} variant="meditating" className="about-me-oracle" />
-        <p className="about-me-eyebrow">{language === "pt" ? "Seu oráculo" : "Your oracle"}</p>
+        <p className="about-me-eyebrow">{t.aboutMe.oracleLabel}</p>
         <h1>
-          {language === "pt" ? "Eu conheço " : "I know "}
-          <span className="text-iridescent">{pct}%</span>
-          {language === "pt" ? " de você" : " of you"}
+          {(() => {
+            // Both locales phrase this as "...{percent}% ...", keep the "%"
+            // inside the same iridescent span the number gets, matching how
+            // this line looked before it went through the copy source.
+            const [before, after] = t.aboutMe.knowledge.split("{percent}%");
+            return (
+              <>
+                {before}
+                <span className="text-iridescent">{pct}%</span>
+                {after}
+              </>
+            );
+          })()}
         </h1>
-        <p className="about-me-hero-sub">
-          {language === "pt"
-            ? "Não é uma nota. Só o quanto do seu universo já ficou nítido até agora."
-            : "Not a score. Just how much of your universe has come into focus so far."}
-        </p>
+        <p className="about-me-hero-sub">{t.aboutMe.notAScore}</p>
         <div className="knowledge-bar">
           <div className="knowledge-fill" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
-      {error && <p className="form-error">{error}</p>}
+      {error && !data && <LoadError message={error} onRetry={loadAboutMe} />}
 
       {!data && !error && <AboutMeSkeleton />}
 

@@ -66,3 +66,9 @@ function sync(sourceName, targetName, pattern) {
 
 sync("fotos", "oracle", /\.(png|jpe?g|webp|svg)$/i);
 sync("music", "music", /\.(mp3|wav|ogg|m4a)$/i);
+// Favicon + social link-preview image (UPDATES.md round 4), same manual
+// drop-folder convention as /fotos and /music above. sync() only reads one
+// level deep, so each /fav subfolder is synced on its own rather than
+// making sync() recursive for just these two files.
+sync("fav/icon", "fav/icon", /\.(png|ico|svg)$/i);
+sync("fav/thumb", "fav/thumb", /\.(png|jpe?g|webp)$/i);

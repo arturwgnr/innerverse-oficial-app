@@ -14,6 +14,9 @@ export default {
     cancel: "Cancelar",
     send: "Enviar",
     loading: "Carregando...",
+    retry: "Tentar de novo",
+    close: "Fechar",
+    onlyMoodLogged: "Só o humor foi registrado.",
     networkError: [
       "O Oráculo perdeu o fio da visão no meio do caminho. Tente de novo em instantes.",
       "Estática no fio cósmico, o Oráculo não captou isso.",
@@ -206,13 +209,20 @@ export default {
   today: {
     greeting: "Oi, {name}.",
     streakUnit: "dias seguidos",
+    // Mensagens de tier nunca cravam um número exato de dias (UPDATES.md
+    // round 4: um streak de 10 dias estava mostrando "Sete dias seguidos",
+    // copy e número real fora de sincronia, já que cada tier cobre uma faixa
+    // inteira, ex: min:7 cobre de 7 a 13. O número real já aparece sozinho
+    // no badge, essas mensagens só precisam soar coerentes com a faixa,
+    // termos de piso tipo "uma semana inteira" continuam verdadeiros pra
+    // toda a faixa que cobrem, cravar "sete dias" não.
     streakTiers: [
       { min: 0, messages: ["Comece seu streak hoje.", "Hoje é um bom dia pra começar um."] },
       { min: 1, messages: ["Dia um. Volte amanhã.", "Começou aqui. Até amanhã."] },
-      { min: 2, messages: ["Um ritmo está se formando.", "Dois seguidos, continue assim."] },
+      { min: 2, messages: ["Um ritmo está se formando.", "Um atrás do outro, continue assim."] },
       { min: 4, messages: ["Bom ritmo.", "Isso já está parecendo um hábito."] },
-      { min: 7, messages: ["Uma semana inteira, e contando.", "Sete dias seguidos, consistência de verdade."] },
-      { min: 14, messages: ["Duas semanas seguidas.", "Duas semanas, isso já é quem você é agora."] },
+      { min: 7, messages: ["Uma semana inteira, e contando.", "Consistência de verdade, e já dá pra ver."] },
+      { min: 14, messages: ["Fundo num ritmo de verdade agora.", "Isso já é quem você é agora."] },
       { min: 30, messages: ["Consistência notável.", "Um mês forte. Impressionante de verdade."] },
     ],
     write: "Escrever",
@@ -323,7 +333,9 @@ export default {
   },
   aboutMe: {
     title: "Sobre mim",
+    oracleLabel: "Seu oráculo",
     knowledge: "Eu conheço {percent}% de você",
+    notAScore: "Não é uma nota. Só o quanto do seu universo já ficou nítido até agora.",
     understood: "O que eu entendi até agora",
     light: "O que já vai bem",
     dark: "O que você talvez esteja evitando",

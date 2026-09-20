@@ -219,7 +219,7 @@ export function Calendar() {
               type="button"
               className="modal-close"
               onClick={() => setDayDetail(null)}
-              aria-label={language === "pt" ? "Fechar" : "Close"}
+              aria-label={t.common.close}
             >
               ×
             </button>
@@ -262,11 +262,7 @@ export function Calendar() {
                     </ul>
                   )}
                   {!entry.text_content && !(entry.bullets?.length > 0) && (
-                    <p className="day-detail-text sheet-sub">
-                      {language === "pt"
-                        ? "Só o humor foi registrado."
-                        : "Only a mood was logged."}
-                    </p>
+                    <p className="day-detail-text sheet-sub">{t.common.onlyMoodLogged}</p>
                   )}
                 </div>
               ))}
@@ -282,7 +278,7 @@ export function Calendar() {
               type="button"
               className="modal-close"
               onClick={() => setTieBreakDay(null)}
-              aria-label={language === "pt" ? "Fechar" : "Close"}
+              aria-label={t.common.close}
             >
               ×
             </button>

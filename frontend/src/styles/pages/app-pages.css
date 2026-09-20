@@ -1313,6 +1313,12 @@
 
 /* Now a <Link> to its own page (UPDATES.md round 5 #5), not an inline
    expand/collapse toggle, text-decoration reset since it's an anchor. */
+/* UPDATES.md round 4: was a dashed border on a transparent fill, the app's
+   placeholder/drop-zone affordance everywhere else (see empty states), not
+   a real permanent link to a whole page of history. Restyled to match the
+   app's actual quiet-pill convention (.footer-top-link, sidebar links):
+   solid surface fill, solid 1px border, a real hover lift, so this reads as
+   an intentional, finished action instead of a leftover placeholder. */
 .about-me-history-toggle {
   display: flex;
   align-items: center;
@@ -1320,22 +1326,44 @@
   gap: var(--space-2);
   width: 100%;
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  border: 1px dashed var(--surface-border);
-  background: transparent;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
   color: var(--muted-foreground);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
   text-decoration: none;
   cursor: pointer;
   margin-bottom: var(--space-4);
   transition:
     color 0.15s var(--ease-out),
-    border-color 0.15s var(--ease-out);
+    background 0.15s var(--ease-out),
+    border-color 0.15s var(--ease-out),
+    transform 0.15s var(--ease-out);
+}
+
+.about-me-history-toggle span {
+  transition: transform 0.2s var(--ease-out);
 }
 
 .about-me-history-toggle:hover {
   color: var(--foreground);
-  border-color: color-mix(in oklab, var(--primary) 40%, var(--surface-border));
+  background: var(--accent);
+  border-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .about-me-history-toggle:hover {
+    transform: translateY(-1px);
+  }
+
+  .about-me-history-toggle:hover span {
+    transform: translateX(2px);
+  }
+}
+
+.about-me-history-toggle:active {
+  transform: scale(0.98);
 }
 
 .about-me-history-page {

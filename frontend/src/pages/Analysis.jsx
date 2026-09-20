@@ -5,6 +5,7 @@ import { api } from "../lib/api.js";
 import { pickLine } from "../lib/toastCopy.js";
 import { ScreenTitle } from "../components/AppShell.jsx";
 import { AnalysisSkeleton } from "../components/Skeleton.jsx";
+import { LoadError } from "../components/LoadError.jsx";
 
 const FREE_DAILY_ANALYSIS_LIMIT = 5;
 
@@ -62,7 +63,8 @@ export function Analysis() {
   // week with any content, higher indices step backward into older weeks.
   const [selectedWeekIndex, setSelectedWeekIndex] = useState(0);
 
-  useEffect(() => {
+  function loadAnalyses() {
+    setError(null);
     api
       .get("/api/analysis")
       .then((data) => {
@@ -79,10 +81,15 @@ export function Analysis() {
         setVerdicts(seeded);
       })
       .catch((err) => setError(err.message));
+  }
+
+  useEffect(() => {
+    loadAnalyses();
     api
       .get("/api/entries")
       .then((data) => setEntries(data))
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Filters narrow which weeks have visible content, jumping back to the
@@ -220,7 +227,7 @@ export function Analysis() {
     <div className="analysis-page">
       <ScreenTitle eyebrow={t.analysis.eyebrow} title={t.analysis.title} sub={t.analysis.note} />
 
-      {error && <p className="form-error">{error}</p>}
+      {error && !analyses && <LoadError message={error} onRetry={loadAnalyses} />}
 
       {!analyses && !error && <AnalysisSkeleton />}
 
@@ -374,7 +381,7 @@ export function Analysis() {
               type="button"
               className="modal-close"
               onClick={() => setViewEntryId(null)}
-              aria-label={language === "pt" ? "Fechar" : "Close"}
+              aria-label={t.common.close}
             >
               ×
             </button>
@@ -396,7 +403,7 @@ export function Analysis() {
             )}
             {!viewedEntry.text_content && !(viewedEntry.bullets?.length > 0) && (
               <p className="day-detail-text sheet-sub">
-                {language === "pt" ? "Só o humor foi registrado." : "Only a mood was logged."}
+                {t.common.onlyMoodLogged}
               </p>
             )}
           </div>

@@ -14,6 +14,12 @@ export default {
     cancel: "Cancel",
     send: "Send",
     loading: "Loading...",
+    retry: "Try again",
+    // Both were duplicated verbatim, hardcoded inline, across Analysis.jsx
+    // and Calendar.jsx (UPDATES.md round 4, "hardcoded text scattered
+    // across the app").
+    close: "Close",
+    onlyMoodLogged: "Only a mood was logged.",
     // Error toasts, in character (user request): the Oracle visibly having
     // a moment, not a flat "something went wrong". Picked at random via
     // pickLine wherever these are thrown (lib/api.js, Login.jsx,
@@ -274,13 +280,20 @@ export default {
     // as the toast copy), so the same streak count doesn't always show the
     // exact same sentence.
     streakUnit: "day streak",
+    // Tier messages never state an exact day count (UPDATES.md round 4: a
+    // 10-day streak was showing "Seven days straight", copy and the real
+    // number out of sync, since one tier covers a whole range, e.g. min:7
+    // covers 7 through 13). The real number already renders on its own in
+    // the badge, these only need to feel matched to roughly how far along
+    // the streak is, floor words like "a full week" stay true for the whole
+    // range they cover, an exact "seven days" claim does not.
     streakTiers: [
       { min: 0, messages: ["Start your streak today.", "Today's a good day to begin one."] },
       { min: 1, messages: ["Day one. Come back tomorrow.", "It starts here. See you tomorrow."] },
-      { min: 2, messages: ["A rhythm is forming.", "Two in a row, keep it going."] },
+      { min: 2, messages: ["A rhythm is forming.", "Back to back, keep it going."] },
       { min: 4, messages: ["Nice momentum.", "This is starting to feel like a habit."] },
-      { min: 7, messages: ["A full week, and counting.", "Seven days straight, real consistency."] },
-      { min: 14, messages: ["Two weeks deep.", "Two weeks in, this is who you are now."] },
+      { min: 7, messages: ["A full week, and counting.", "Real consistency, and it shows."] },
+      { min: 14, messages: ["Deep in a real rhythm now.", "This is who you are now."] },
       { min: 30, messages: ["Remarkable consistency.", "A month strong. Genuinely impressive."] },
     ],
     write: "Write",
@@ -412,7 +425,9 @@ export default {
   },
   aboutMe: {
     title: "About me",
+    oracleLabel: "Your oracle",
     knowledge: "I know {percent}% of you",
+    notAScore: "Not a score. Just how much of your universe has come into focus so far.",
     understood: "What I've understood",
     light: "What's already going well",
     dark: "What you might be avoiding",

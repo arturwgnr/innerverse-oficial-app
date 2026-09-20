@@ -157,6 +157,48 @@ textarea:focus {
   color: var(--primary);
 }
 
+/* In-context load failure (UPDATES.md round 4): a quiet card, not a raw red
+   line dropped where content should be, used on About me/Analysis when the
+   initial fetch fails so the page still reads as "the app is here, that one
+   thing hiccuped" instead of "the app crashed". */
+.load-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.load-error p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+.load-error-retry {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 0.85rem;
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease-out),
+    transform 0.15s var(--ease-out);
+}
+
+.load-error-retry:hover {
+  background: color-mix(in oklab, var(--accent) 82%, var(--primary));
+}
+
+.load-error-retry:active {
+  transform: scale(0.97);
+}
+
 .field-label {
   font-weight: 500;
   margin: var(--space-3) 0 var(--space-2);
@@ -911,7 +953,6 @@ textarea:focus {
 }
 
 .app-sidebar-backdrop.open {
-  width: fit-content !important;
   opacity: 1;
   pointer-events: auto;
 }
