@@ -179,16 +179,18 @@
   }
 }
 
-/* Below 780px the nav links are already hidden, but the logo, language
-   toggle and CTA alone still don't fit a narrow phone screen at their
-   normal size, this was overflowing the viewport horizontally instead of
-   wrapping. Icon-only toggle plus a tighter CTA closes the gap. */
+/* Below 780px the nav links are already hidden, but the logo and CTA alone
+   still don't fit a narrow phone screen at their normal size. Bug fix: this
+   flex-wrap safety net was being applied to `.landing-nav` (the outer
+   position:fixed bar, not a flex container at all) instead of
+   `.landing-nav-inner` (the actual `display:flex` row), so it silently did
+   nothing, the CTA overflowed past the viewport edge uncontained, and that
+   overflow was blowing out the effective page width sitewide, every other
+   `vw`-based measurement on the page (the `.container` max-width included)
+   was computing against that inflated width instead of the real ~390px
+   screen, which is what made body copy read as clipped/cut off too. */
 @media (max-width: 560px) {
-  /* flex-wrap as the safety net, not exact pixel budgeting: rather than
-     guess right up to the edge of every font's rendered width, let actions
-     drop to their own line if brand + toggle + CTA genuinely don't fit one
-     row, nothing gets clipped off-screen either way. */
-  .landing-nav {
+  .landing-nav-inner {
     flex-wrap: wrap;
     row-gap: var(--space-3);
     gap: var(--space-2);
@@ -206,11 +208,6 @@
   .landing-nav-cta {
     padding: var(--space-2) var(--space-4);
     font-size: 0.78rem;
-  }
-
-  .landing-nav .language-toggle button {
-    padding: var(--space-1) var(--space-2);
-    font-size: 0.6rem;
   }
 }
 
